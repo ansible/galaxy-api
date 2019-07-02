@@ -1,45 +1,39 @@
-"""
-Django settings for galaxy_api project.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/2.2/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/2.2/ref/settings/
-"""
+"""Project settings."""
 
 import sys
 
 from dynaconf import LazySettings
 
+
 # --- BEGIN OF DYNACONF HEADER ---
 settings = LazySettings(
     GLOBAL_ENV_FOR_DYNACONF='GALAXY',
+
 )
 # --- END OF DYNACONF HEADER ---
+
+# ---------------------------------------------------------
+# Django settings
+# ---------------------------------------------------------
 
 ALLOWED_HOSTS = []
 
 # Application definition
+
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
 
     'rest_framework',
 
-    'galaxy_common.apps.AppConfig',
+    'galaxy_api.db',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -55,7 +49,6 @@ TEMPLATES = [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -63,6 +56,8 @@ TEMPLATES = [
 
 
 WSGI_APPLICATION = 'galaxy_api.wsgi.application'
+
+# Database
 
 DATABASES = {
     'default': {
@@ -75,8 +70,8 @@ DATABASES = {
     }
 }
 
+
 # Internationalization
-# https://docs.djangoproject.com/en/2.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -89,29 +84,18 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
 
-# API settings
+# ---------------------------------------------------------
+# Third party libraries settings
+# ---------------------------------------------------------
+
+# ---------------------------------------------------------
+# Application settings
+# ---------------------------------------------------------
 
 API_PATH_PREFIX = 'api'
-
-REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-    )
-}
-
-# Celery settings
-
-CELERY_BROKER_URL = 'amqp://{user}:{password}@{host}:{port}/{vhost}'.format(
-    user=settings.get('RABBITMQ_USER', 'galaxy'),
-    password=settings.get('RABBITMQ_PASSWORD', ''),
-    host=settings.get('RABBITMQ_HOST', 'localhost'),
-    port=settings.get('RABBITMQ_PORT', 5672),
-    vhost=settings.get('RABBITMQ_VHOST', 'galaxy'),
-)
 
 # --- BEGIN OF DYNACONF FOOTER ---
 settings.populate_obj(sys.modules[__name__])
