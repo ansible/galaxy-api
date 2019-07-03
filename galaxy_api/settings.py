@@ -27,7 +27,8 @@ INSTALLED_APPS = [
 
     'rest_framework',
 
-    'galaxy_api.db',
+    'galaxy_api.api',
+    'galaxy_api.auth',
 ]
 
 MIDDLEWARE = [
@@ -38,6 +39,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'galaxy_api.urls'
+
+AUTH_USER_MODEL = 'galaxy_auth.user'
 
 TEMPLATES = [
     {
