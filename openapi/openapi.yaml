@@ -1,0 +1,2386 @@
+info:
+  description: 'Galaxy autohub API (wip)'
+  title: 'Galaxy autohub API (wip)'
+  version: "1.2.0"
+  contact:
+    url: https://github.com/ansible/galaxy/issues
+    name: 'Ansible Galaxy Issues'
+    email: notreal@example.invalid
+
+openapi: 3.0.0
+
+servers:
+  - url: http://localhost:5001/api/v3
+    description: 'local dev server'
+
+externalDocs:
+  description: 'General docs about Ansible Galaxy'
+  url: https://galaxy.ansible.com/docs/
+
+tags:
+  - name: 'collections'
+    externalDocs:
+      url: https://galaxy.ansible.com/docs/contributing/creating_collections.html
+      description: 'Creating Collections docs at galaxy.ansible.com'
+  - name: 'collection-imports'
+    description: 'Importing Collections'
+  - name: 'collection-versions'
+    description: 'Versions of Collections'
+  - name: 'download'
+    description: 'Downloading artifacts'
+  - name: 'client_mazer'
+    description: 'API used by mazer and or ansible-galaxy'
+  - name: 'introspection'
+    description: 'API used to gather information about the API itself'
+  - name: 'v3'
+    description: 'API endpoints from the v3 API'
+  - name: 'v2'
+    description: 'API endpoints from the v2 API'
+  - name: 'me'
+    description: 'API related to the current user.'
+  - name: 'pulp'
+    description: 'API related to Pulp'
+  - name: 'search'
+    description: 'API for searching'
+  - name: 'namespaces'
+    description: 'API for Namespaces'
+  - name: 'tags'
+    description: 'API for Ansible Galaxy tags.'
+  - name: 'tasks'
+    description: 'API for Pulp tasks'
+  - name: 'users'
+    description: 'API for Users'
+  - name: 'v1'
+    description: 'API endpoints from the v1 API.'
+
+paths:
+  '/':
+    get:
+      summary: 'Get info about the API'
+      operationId: GetAPI
+      tags:
+        - introspection
+      parameters: []
+      responses:
+        '200':
+          description: 'A map of endpoints in the API'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIEndpoints'
+
+  '/collections/':
+    post:
+      summary: 'Create a new CollectionVersion by importing a collection artifact'
+      operationId: ImportCollectionVersionArtifact
+      tags:
+        - collections
+        - v2
+        - client_mazer
+      security:
+        - UserTokenApiKey: []
+        - UserBasicAuth: []
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/CollectionVersionArtifactBody'
+      responses:
+        '202':
+          $ref: '#/components/responses/CollectionImportAccepted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          description: 'Unexpected Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  '/collections/{id}/':
+    get:
+      summary: 'Get a Collection by id'
+      operationId: GetCollectionById
+      tags:
+        - collections
+        - v2
+      parameters:
+        - $ref: '#/components/parameters/CollectionId'
+      responses:
+        '200':
+          description: 'A Collection'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+
+  '/collections/{id}/versions/':
+    get:
+      summary: 'Get list of versions for a collection id'
+      operationId: ListCollectionVersionsById
+      tags:
+        - collections
+        - v2
+      parameters:
+        - $ref: '#/components/parameters/CollectionId'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersionLinks'
+
+  '/collections/{namespace}/{name}/':
+    parameters:
+      - $ref: '#/components/parameters/CollectionNamespace'
+      - $ref: '#/components/parameters/CollectionName'
+    get:
+      summary: 'Get a Collection by namespace and name'
+      operationId: GetCollectionByNamespaceName
+      tags:
+        - collections
+        - v2
+        - client_mazer
+      responses:
+        '200':
+          description: 'A Collection'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+
+  '/collections/{namespace}/{name}/versions/':
+    parameters:
+      - $ref: '#/components/parameters/CollectionNamespace'
+      - $ref: '#/components/parameters/CollectionName'
+    get:
+      summary: 'Get a list of CollectionVersions for a Collection by namespace and name'
+      operationId: ListCollectionVersionsByNamespaceName
+      tags:
+        - collections
+        - v2
+        - client_mazer
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersionLinks'
+
+  '/collections/{namespace}/{name}/versions/{version}/':
+    parameters:
+      - $ref: '#/components/parameters/CollectionNamespace'
+      - $ref: '#/components/parameters/CollectionName'
+      - $ref: '#/components/parameters/SemanticVersion'
+    get:
+      summary: 'Get a CollectionVersion by namespace, name, and version'
+      operationId: GetCollectionVersion
+      tags:
+        - collections
+        - v2
+        - client_mazer
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersion'
+
+  '/collections/{namespace}/{name}/versions/{version}/artifact/':
+    parameters:
+      - $ref: '#/components/parameters/CollectionNamespace'
+      - $ref: '#/components/parameters/CollectionName'
+      - $ref: '#/components/parameters/SemanticVersion'
+    get:
+      summary: 'Get Artifact details for a Collection by namespace, name, and version'
+      operationId: GetCollectionVersionArtifact
+      tags:
+        - collections
+        - v2
+        - client_mazer
+      parameters:
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersionArtifact'
+
+
+  '/collection-imports/{id}/':
+    get:
+      summary: 'Get a Collection-Import (import task) by id'
+      operationId: GetCollectionImportById
+      tags:
+        - collection-imports
+        - v2
+      parameters:
+        - description: 'A unique integer value identifying this collection import.'
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: 'The result of a collection import'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionImportResult'
+
+  '/collection-versions/{id}/artifact/':
+    get:
+      summary: 'Get a CollectionVersionArtifact'
+      operationId: GetCollectionVersionArtifactById
+      tags:
+        - collection-versions
+        - v2
+      parameters:
+        - description: 'The CollectionVersion id'
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersionArtifact'
+
+  '/collection-versions/{version_pk}/':
+    get:
+      summary: 'Get a CollectionVersion by version_pk'
+      operationId: GetCollectionVersionByVersionPk
+      tags:
+        - collection-versions
+        - v2
+      parameters:
+        - description: 'The CollectionVersion version_pk'
+          in: path
+          name: version_pk
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersion'
+
+  '/collection-version-artifacts/':
+    get:
+      summary: 'Get a list of Collection Version artifacts'
+      operationId: GetCollectionVersionArtifacts
+      tags:
+        - collection-version-artifacts
+        - v3
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersionArtifacts'
+
+    post:
+      summary: 'Create a new CollectionVersionArtifact by uploading collection artifact'
+      operationId: UploadCollectionVersionArtifact
+      description:
+        Create a new CollectionVersionArtifact by uploading a collection artifact.
+        This will add the new artifact, but will not create a new Collection.
+        To create a CollectionVersionArtifact and a Collection, use 'POST /collections'
+      tags:
+        - v3
+        - collection-version-artifacts
+      security:
+        - UserTokenApiKey: []
+        - UserBasicAuth: []
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/CollectionVersionArtifactBody'
+      responses:
+        '202':
+          $ref: '#/components/responses/CollectionImportAccepted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          description: 'Unexpected Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  '/collection-version-artifacts/{artifact_id}':
+    get:
+      summary: 'Get a Collection Version artifacts'
+      operationId: GetCollectionVersionArtifactByArtifactId
+      parameters:
+        - $ref: '#/components/parameters/CollectionVersionArtifactId'
+      tags:
+        - collection-version-artifacts
+        - v3
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersionArtifact'
+
+  '/collection-version-artifacts/{artifact_id}/download':
+    get:
+      summary: 'Download a Collection Version artifact'
+      operationId: DownloadCollectionVersionArtifact
+      parameters:
+        - $ref: '#/components/parameters/CollectionVersionArtifactId'
+      tags:
+        - collection-version-artifacts
+        - v3
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersionArtifactDownload'
+
+  '/collection-version-artifacts/filenames/{filename}':
+    get:
+      summary: 'Get Collection Version Artifact info by filename'
+      operationId: GetCollectionVersionArtifactByFilename
+      parameters:
+        - $ref: '#/components/parameters/CollectionVersionArtifactFilename'
+      tags:
+        - collection-version-artifacts
+        - v3
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersionArtifact'
+
+  '/download/{filename}':
+    get:
+      summary: 'Download the collection artifact'
+      operationId: DownloadArtifactByFilename
+      tags:
+        - download
+        - client_mazer
+      parameters:
+        - $ref: '#/components/parameters/CollectionVersionArtifactFilename'
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersionArtifactDownload'
+
+  '/me/':
+    get:
+      summary: 'Get the User info for the current user'
+      operationId: GetMeDetail
+      tags:
+        - me
+        - v1
+      security:
+        - UserTokenApiKey: []
+        - UserBasicAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: 'Response with the current User'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  '/namespaces/':
+    get:
+      summary: 'Get a list of Namespaces'
+      operationId: ListNamespaces
+      tags:
+        - namespaces
+        - v1
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          $ref: '#/components/responses/Namespaces'
+
+    post:
+      operationId: 'CreateNamespace'
+      summary: 'Create a Namespace'
+      parameters: []
+      security:
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/Namespace'
+      responses:
+        '201':
+            $ref: '#/components/responses/Namespace'
+      tags:
+        - namespaces
+        - v3
+
+  '/namespaces/{id}/':
+    get:
+      summary: 'Get a Namespace'
+      operationId: GetNamespace
+      parameters:
+        - $ref: '#/components/parameters/NamespaceId'
+      tags:
+        - namespaces
+        - v3
+      responses:
+        '200':
+            $ref: '#/components/responses/Namespace'
+    patch:
+      summary: 'Update a Namespace'
+      operationId: 'UpdateNamespace'
+      parameters:
+        - $ref: '#/components/parameters/NamespaceId'
+      security:
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/Namespace'
+      responses:
+        '200':
+            $ref: '#/components/responses/Namespace'
+      tags:
+        - namespaces
+        - v3
+    delete:
+      summary: 'Delete a Namespace'
+      operationId: DeleteNamespace
+      parameters:
+        - $ref: '#/components/parameters/NamespaceId'
+      security:
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      responses:
+        '204':
+          $ref: '#/components/responses/DeleteSuccessful'
+      tags:
+        - namespaces
+        - v3
+
+  '/provider_namespaces/':
+    get:
+      summary: 'Get Provider Namespaces'
+      operationId: GetProviderNamespaces
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          $ref: '#/components/responses/ProviderNamespaces'
+      tags:
+        - provider_namespaces
+        - v3
+    post:
+      operationId: CreateProviderNamespace
+      summary: 'Create a Provider Namespace'
+      parameters: []
+      security:
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/ProviderNamespace'
+      responses:
+        '201':
+            $ref: '#/components/responses/ProviderNamespace'
+      tags:
+        - provider_namespaces
+        - v3
+
+  '/provider_namespaces/{id}/':
+    get:
+      operationId: GetProviderNamespace
+      description: 'Get a Provider Namespace'
+      parameters:
+        - $ref: '#/components/parameters/ProviderNamespaceId'
+      responses:
+        '200':
+          $ref: '#/components/responses/ProviderNamespace'
+      tags:
+        - provider_namespaces
+        - v3
+
+    patch:
+      operationId: UpdateProviderNamespace
+      description: 'Update a Provider Namespace'
+      parameters:
+        - $ref: '#/components/parameters/ProviderNamespaceId'
+      security:
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      requestBody:
+        $ref: '#/components/requestBodies/ProviderNamespace'
+      responses:
+        '200':
+          $ref: '#/components/responses/ProviderNamespace'
+      tags:
+        - provider_namespaces
+        - v3
+
+    delete:
+      operationId: DeleteProviderNamespace
+      description: 'Delete a Provider Namespace'
+      parameters:
+        - $ref: '#/components/parameters/ProviderNamespaceId'
+      security:
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      responses:
+        '204':
+          $ref: '#/components/responses/DeleteSuccessful'
+      tags:
+        - provider_namespaces
+        - v3
+
+  '/pulp/content/ansible/collections/':
+    get:
+      tags:
+        - collections
+        - pulp
+        - v3
+      summary: List collections
+      description: |
+        Wrapper for https://pulp-ansible.readthedocs.io/en/latest/restapi.html#operation/content_ansible_collections_list
+      operationId: GetPulpContentAnsibleCollections
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+        - name: name
+          in: query
+          description: Filter results where name matches value
+          schema:
+            type: string
+        - name: namespace
+          in: query
+          description: Filter results where namespace matches value
+          schema:
+            type: string
+        - name: version
+          in: query
+          description: Filter results where version matches value
+          schema:
+            type: string
+        - name: repository_version
+          in: query
+          description: Repository Version referenced by HREF
+          schema:
+            type: string
+        - name: repository_version_added
+          in: query
+          description: Repository Version referenced by HREF
+          schema:
+            type: string
+        - name: repository_version_removed
+          in: query
+          description: Repository Version referenced by HREF
+          schema:
+            type: string
+      responses:
+        200:
+          $ref: '#/components/responses/PulpContentAnsibleCollections'
+
+    post:
+      summary: Create a collection
+      description: |
+        ViewSet for Ansible Collection.
+        Wrapper for https://pulp-ansible.readthedocs.io/en/latest/restapi.html#operation/content_ansible_collections_create
+      operationId: content_ansible_collections_create
+      tags:
+        - pulp
+        - collections
+        - v3
+      security:
+        - UserTokenApiKey: []
+        - UserBasicAuth: []
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PulpCollection'
+        required: true
+      responses:
+        201:
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PulpCollection'
+
+  # Could just make this /tasks/
+  '/pulp/tasks/':
+    get:
+      tags:
+        - tasks
+        - pulp
+        - v3
+      summary: List tasks
+      description: 'Wrapper for Pulp API GET /pulp/api/v3/tasks/'
+      operationId: GetPulpTasks
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+        - name: state__in
+          in: query
+          description: Filter results where state is in a comma-separated list of values
+          schema:
+            type: string
+        - name: worker
+          in: query
+          description: Foreign Key referenced by HREF
+          schema:
+            type: string
+        - name: worker__in
+          in: query
+          description: Filter results where worker is in a comma-separated list of values
+          schema:
+            type: string
+        - name: name__contains
+          in: query
+          description: Filter results where name contains value
+          schema:
+            type: string
+        - name: started_at__lt
+          in: query
+          description: Filter results where started_at is less than value
+          schema:
+            type: string
+        - name: started_at__lte
+          in: query
+          description: Filter results where started_at is less than or equal to value
+          schema:
+            type: string
+        - name: started_at__gt
+          in: query
+          description: Filter results where started_at is greater than value
+          schema:
+            type: string
+        - name: started_at__gte
+          in: query
+          description: Filter results where started_at is greater than or equal to value
+          schema:
+            type: string
+        - name: started_at__range
+          in: query
+          description: >-
+            Filter results where started_at is between two comma separated
+            values
+          schema:
+            type: string
+        - name: finished_at__lt
+          in: query
+          description: Filter results where finished_at is less than value
+          schema:
+            type: string
+        - name: finished_at__lte
+          in: query
+          description: Filter results where finished_at is less than or equal to value
+          schema:
+            type: string
+        - name: finished_at__gt
+          in: query
+          description: Filter results where finished_at is greater than value
+          schema:
+            type: string
+        - name: finished_at__gte
+          in: query
+          description: Filter results where finished_at is greater than or equal to value
+          schema:
+            type: string
+        - name: finished_at__range
+          in: query
+          description: >-
+            Filter results where finished_at is between two comma separated
+            values
+          schema:
+            type: string
+        - name: parent
+          in: query
+          description: Foreign Key referenced by HREF
+          schema:
+            type: string
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: started_at
+          in: query
+          description: ISO 8601 formatted dates are supported
+          schema:
+            type: string
+        - name: finished_at
+          in: query
+          description: ISO 8601 formatted dates are supported
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/PulpTasks'
+
+  '/pulp/tasks/{pulp_task_id}':
+    get:
+      tags:
+        - tasks
+        - pulp
+        - v3
+      summary: Inspect a task
+      description: "Wrapper API for Pulp GET {task_href} aka GET /pulp/api/v3/tasks/{task_id}"
+      operationId: GetPulpTask
+      parameters:
+        - name: pulp_task_id
+          in: path
+          description: 'ID of Task. e.g.: "1" in /pulp/api/v3/tasks/1/'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PulpTask'
+    delete:
+      tags:
+        - tasks
+        - pulp
+        - v3
+      summary: Delete a task
+      operationId: DeletePulpTask
+      parameters:
+        - name: pulp_task_id
+          in: path
+          description: 'ID of Task. e.g.: /pulp/api/v3/tasks/1/'
+          required: true
+          schema:
+            type: string
+      security:
+        - UserTokenApiKey: []
+        - UserBasicAuth: []
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      responses:
+        204:
+          description: A DELETE operation was successful
+    patch:
+      tags:
+        - tasks
+        - pulp
+        - v3
+      summary: Cancel a task
+      description: This operation cancels a task.
+      operationId: PatchPulpTask
+      parameters:
+        - name: pulp_task_id
+          in: path
+          description: 'ID of Task. e.g.: /pulp/api/v3/tasks/1/'
+          required: true
+          schema:
+            type: string
+      security:
+        - UserTokenApiKey: []
+        - UserBasicAuth: []
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PulpTaskCancel'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PulpTask'
+
+  '/search/':
+    get:
+      summary: 'Get info about the search API'
+      operationId: GetApiSearch
+      tags:
+        - search
+        - introspection
+        - v1
+      parameters: []
+      responses:
+        '200':
+          description: 'A map of endpoints in the search API'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIEndpoints'
+
+  '/search/content/':
+    get:
+      summary: 'Get a list of Contents by searching'
+      operationId: ListContentBySearch
+      tags:
+        - search
+        - v1
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          $ref: '#/components/responses/Contents'
+
+  '/search/roles/':
+    get:
+      summary: 'Get a list of Roles by searching'
+      operationId: ListRoleBySearch
+      tags:
+        - search
+        - v1
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          $ref: '#/components/responses/Roles'
+
+  '/search/tags/':
+    get:
+      summary: 'Get a list of Tags by searching'
+      operationId: ListTagBySearch
+      tags:
+        - search
+        - v1
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        # TODO: search param tags
+      responses:
+        '200':
+          $ref: '#/components/responses/Tags'
+
+  '/tags/':
+    get:
+      summary: 'Get a list of Galaxy Tags'
+      operationId: ListTags
+      tags:
+        - tags
+        - v1
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          $ref: '#/components/responses/Tags'
+
+    post:
+      summary: 'Create a Galaxy Tag'
+      operationId: CreateTag
+      tags:
+        - tags
+        - v1
+      security:
+        - UserTokenApiKey: []
+        - UserBasicAuth: []
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+        required: true
+      responses:
+        201:
+          description: "Tag creation was succesful"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+
+  '/tags/{id}/':
+    get:
+      summary: 'Get a Galaxy Tag'
+      operationId: GetTagById
+      tags:
+        - tags
+        - v1
+      parameters:
+        - $ref: '#/components/parameters/TagId'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: 'A Galaxy Tag'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+
+    patch:
+      summary: 'Patch/update a Tag by id'
+      operationId: PatchTagById
+      tags:
+        - tags
+        - v1
+      parameters:
+        - $ref: '#/components/parameters/TagId'
+        - $ref: '#/components/parameters/Search'
+      security:
+        - UserTokenApiKey: []
+        - UserBasicAuth: []
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      requestBody:
+        description: 'An Tag to update to'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Tag'
+      responses:
+        '200':
+          description: 'The Tag updated by the PATCH'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+
+  '/users/':
+    get:
+      summary: 'Get a list of Users'
+      operationId: ListUsers
+      tags:
+        - users
+        - v1
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          $ref: '#/components/responses/Users'
+
+  '/users/{id}/':
+    get:
+      summary: 'Get an User by id'
+      operationId: GetUserById
+      tags:
+        - users
+        - v1
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: 'Response with a User'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+    patch:
+      summary: 'Patch/update an User by id'
+      operationId: PatchUserById
+      tags:
+        - users
+        - v1
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+        - $ref: '#/components/parameters/Search'
+      security:
+        - UserTokenApiKey: []
+        - UserBasicAuth: []
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      requestBody:
+        description: 'An User to update to'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: 'The User updated by the PATCH'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+components:
+  schemas:
+
+    APIEndpoints:
+      description: 'Map of API endpoint names to URLS'
+      type: object
+      additionalProperties:
+        type: string
+
+    APIException:
+      type: object
+      description: 'API Exception'
+      properties:
+        code:
+          description: 'Unique identifier for the exception'
+          type: string
+          example: 'not_authenticated'
+        message:
+          type: string
+          example: 'Authentication credentials were not provided.'
+        errors:
+          description: 'A list of additional error objects'
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      required:
+        - code
+        - message
+
+    ArtifactExistsError:
+      allOf:
+        - $ref: '#/components/schemas/ConflictError'
+
+    Author:
+      description: 'Author of a collection or role'
+      type: string
+      format: email
+      # TODO: add author validation pattern
+      example: 'Adrian Likins <alikins@redhat.com>'
+
+    Collection:
+      description: 'An Ansible Collection'
+      type: object
+      properties:
+        latest_version:
+          $ref: '#/components/schemas/CollectionVersionLink'
+        created:
+          type: string
+          readOnly: true
+        deprecated:
+          type: boolean
+        name:
+          type: string
+        namespace:
+          $ref: '#/components/schemas/CollectionNamespace'
+        modified:
+          type: string
+          readOnly: true
+        id:
+          type: integer
+          readOnly: true
+        href:
+          type: string
+          format: uri
+        versions_url:
+          type: string
+
+    CollectionImportError:
+      type: object
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+        traceback:
+          type: string
+
+    CollectionImportMessage:
+      description: 'Message from collection importer including lint results'
+      type: object
+      properties:
+        level:
+          type: string
+        message:
+          type: string
+        time:
+          type: string
+          format: date-time
+      required:
+        - level
+        - message
+        - time
+
+    CollectionImportLintRecord:
+      description: 'Records from collection linters'
+      type: object
+      properties:
+        code:
+          type: string
+        type:
+          type: string
+        message:
+          type: string
+        severity:
+          type: integer
+        score_type:
+          type: string
+          nullable: true
+
+    CollectionCreationResult:
+      description: 'A map of collection import task info, including its url'
+      type: object
+      properties:
+        task:
+          description: 'The url for the queued collection import task. Check it for progress and status.'
+          type: string
+          format: uri
+
+    CollectionImportResult:
+      description: 'Collection import result'
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/CollectionImportError'
+        finished_at:
+          type: string
+          format: date-time
+        id:
+          type: integer
+        imported_version:
+          type: string
+          readOnly: true
+        job_id:
+          type: string
+          format: uuid
+        lint_records:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionImportLintRecord'
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionImportMessage'
+        name:
+          maxLength: 64
+          type: string
+        namespace:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        state:
+          type: string
+        version:
+          maxLength: 64
+          type: string
+      required:
+        - error
+        - finished_at
+        - id
+        - job_id
+        - lint_records
+        - messages
+        - name
+        - namespace
+        - started_at
+        - state
+        - version
+
+    CollectionName:
+      description: 'The name of a Collection'
+      type: string
+      example: 'my_collection'
+      pattern: '^(?!.*__)[a-z]+[0-9a-z_]*$'
+
+    CollectionNamespaceName:
+      description: 'The name of the Collection Namespace'
+      type: string
+      example: 'my_namespace'
+      pattern: '^(?!.*__)[a-z]+[0-9a-z_]*$'
+
+    CollectionNamespace:
+      description: 'The Collection Namespace'
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/CollectionNamespaceName'
+        id:
+          type: integer
+        href:
+          description: 'link to the Namespace'
+          type: string
+          format: uri
+
+    CollectionVersion:
+      description: 'Collection Version'
+      title: 'Collection Version'
+      type: object
+      properties:
+        artifact:
+          $ref: '#/components/schemas/CollectionVersionDetailArtifact'
+        metadata:
+          $ref: '#/components/schemas/CollectionVersionDetailMetadata'
+        hidden:
+          type: boolean
+        download_url:
+          type: string
+          format: uri
+        namespace:
+          $ref: '#/components/schemas/CollectionNamespace'
+        id:
+          type: integer
+        href:
+          type: string
+          format: uri
+        collection:
+          $ref: '#/components/schemas/CollectionVersionDetailCollection'
+
+    CollectionVersionArtifactData:
+      description: 'CollectionVersionArtifact archive file binary and sha256 checksum. Used for importing collection artifacts'
+      type: object
+      properties:
+        sha256:
+          description: 'The sha256sum of the collection artifact file'
+          type: string
+        file:
+          description: 'The binary contents of a collection artifact'
+          type: string
+          format: binary
+
+    CollectionVersionArtifactDetail:
+      type: object
+      title: 'CollectionVersionArtifactDetail'
+      properties:
+        download_url:
+          readOnly: true
+          type: string
+        filename:
+          readOnly: true
+          type: string
+        sha256:
+          type: string
+        size:
+          type: integer
+
+    CollectionVersionArtifactsPage:
+      description: 'A page of a list of CollectionVersionArtifacts'
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            results:
+              description: 'List of CollectionVersionArtifacts for this Page'
+              title: 'CollectionVersionArtifacts'
+              type: array
+              items:
+                $ref: '#/components/schemas/CollectionVersionArtifactDetail'
+          required:
+            - results
+
+    CollectionVersionDependencies:
+      description: 'A map of collection namespace.name to a semantic version'
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/SemanticVersionSpec'
+
+    CollectionVersionDetailArtifact:
+      type: object
+      properties:
+        filename:
+          type: string
+        size:
+          type: integer
+        sha256:
+          type: string
+
+    CollectionVersionDetailCollection:
+      type: object
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+        href:
+          description: 'link to the Collection'
+          type: string
+          format: uri
+
+    CollectionVersionDetailMetadata:
+      description: "The Collection Version metadata from collections galaxy.yml or MANIFEST.JSON"
+      type: object
+      properties:
+        documentation:
+          description: 'Documentation URL'
+          type: string
+          format: uri
+          nullable: true
+        description:
+          description: 'Description of the collection'
+          type: string
+          nullable: true
+        readme:
+          description: 'Name of file to use for README'
+          type: string
+          format: relative-file-path
+        repository:
+          description: 'SCM repository for collection'
+          type: string
+          format: uri
+          nullable: true
+        issues:
+          description: 'URL of issues or bug tracking'
+          type: string
+          format: uri
+          nullable: true
+        version:
+          $ref: '#/components/schemas/SemanticVersion'
+        license_file:
+          description: 'Name of file where license info can be found'
+          type: string
+          format: relative-file-path
+          nullable: true
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/GalaxyTag'
+        dependencies:
+          $ref: '#/components/schemas/CollectionVersionDependencies'
+        license:
+          description: 'A list of SPDX license ids'
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionVersionLicense'
+        name:
+          $ref: '#/components/schemas/CollectionName'
+        namespace:
+          $ref: '#/components/schemas/CollectionNamespaceName'
+        authors:
+          description: 'A list of collection authors'
+          type: array
+          items:
+            $ref: '#/components/schemas/Author'
+        homepage:
+          type: string
+          format: uri
+      required:
+        - namespace
+        - name
+        - version
+
+    CollectionVersionLicense:
+      description: 'A SPDX license id'
+      type: string
+      # TODO: This could in theory be an enum
+
+    CollectionVersionLink:
+      type: object
+      title: 'CollectionVersionLink'
+      properties:
+        href:
+          description: 'The URL to the CollectionVersion'
+          type: string
+        version:
+          type: string
+          maxLength: 64
+
+    CollectionVersionLinksPage:
+      description: 'A page of a list of CollectionVersionLinks'
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            results:
+              description: 'List of CollectionVersionLinks for this Page'
+              title: 'CollectionVersionLinks'
+              type: array
+              items:
+                $ref: '#/components/schemas/CollectionVersionLink'
+          required:
+            - results
+
+    ConflictError:
+      title: 'ConflictError'
+      allOf:
+        - $ref: '#/components/schemas/APIException'
+
+    ConflictCollectionExistsError:
+      allOf:
+        - $ref: '#/components/schemas/ConflictError'
+
+    Content:
+      title: 'Content'
+      allOf:
+        - $ref: '#/components/schemas/V1BaseModel'
+        - type: object
+          properties:
+            company:
+              maxLength: 50
+              nullable: true
+              type: string
+            description:
+              maxLength: 255
+              type: string
+            download_count:
+              readOnly: true
+              type: string
+            download_rank:
+              type: number
+            imported:
+              format: date-time
+              nullable: true
+              type: string
+            is_valid:
+              readOnly: true
+              type: boolean
+            license:
+              maxLength: 50
+              type: string
+            min_ansible_version:
+              maxLength: 10
+              nullable: true
+              type: string
+            name:
+              maxLength: 512
+              type: string
+            relevance:
+              type: number
+            role_type:
+              readOnly: true
+              type: string
+            search_rank:
+              type: number
+            travis_status_url:
+              readOnly: true
+              type: string
+            username:
+              readOnly: true
+              type: string
+          required:
+            - name
+            - relevance
+            - search_rank
+            - download_rank
+
+    ContentsPage:
+      description: "A page of a list of Contents"
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            results:
+              description: 'List of Contents for this Page'
+              title: 'Contents'
+              type: array
+              items:
+                $ref: '#/components/schemas/Content'
+          required:
+            - results
+
+    Error:
+      type: object
+      description: 'Error data'
+      properties:
+        code:
+          description: 'Unique identifier for the error'
+          type: string
+          example: 'invalid'
+        message:
+          type: string
+          example: 'namespace and name parameters are required'
+        field:
+          description: 'The name of the field involved'
+          type: string
+          example: 'namespace'
+      required:
+        - code
+        - message
+
+    GalaxyTag:
+      description: 'A Galaxy Tag'
+      type: string
+      pattern: '^[a-z0-9]+$'
+      example: 'development'
+
+    Namespace:
+      title: 'Namespace'
+      description: 'A Namespace'
+      allOf:
+        - $ref: '#/components/schemas/V1BaseModel'
+        - type: object
+          properties:
+            avatar_url:
+              maxLength: 256
+              nullable: true
+              type: string
+            company:
+              maxLength: 256
+              nullable: true
+              type: string
+            description:
+              maxLength: 255
+              type: string
+            email:
+              maxLength: 256
+              nullable: true
+              type: string
+            html_url:
+              maxLength: 256
+              nullable: true
+              type: string
+            is_vendor:
+              type: boolean
+            location:
+              maxLength: 256
+              nullable: true
+              type: string
+            name:
+              maxLength: 512
+              type: string
+          required:
+            - name
+
+    NamespacesPage:
+      description: "A Page of a list of Namespaces"
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            results:
+              description: 'List of Namespaces for this Page'
+              title: 'Namespaces'
+              type: array
+              items:
+                $ref: '#/components/schemas/Namespace'
+          required:
+            - results
+
+    RepositoryNameError:
+      allOf:
+        - $ref: '#/components/schemas/ConflictError'
+
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/APIException'
+
+    PageCount:
+      type: integer
+
+    PageInfo:
+      description: 'Pagination info'
+      title: 'Page Info'
+      properties:
+        count:
+          $ref: '#/components/schemas/PageCount'
+        next:
+          $ref: '#/components/schemas/PageNext'
+        previous:
+          $ref: '#/components/schemas/PagePrevious'
+        result_type:
+          type: string
+          description: 'The type of object in the results list'
+          nullable: true
+
+    PageNext:
+      type: string
+      format: uri
+
+    PagePrevious:
+      description: 'The previous page'
+      type: string
+      format: uri
+
+    ProviderNamespace:
+      description: 'A Provider Namespace'
+      title: 'ProviderNamespace'
+      allOf:
+        - $ref: '#/components/schemas/V1BaseModel'
+        - type: object
+          properties:
+            avatar_url:
+              maxLength: 256
+              nullable: true
+              type: string
+            company:
+              maxLength: 256
+              nullable: true
+              type: string
+            description:
+              maxLength: 255
+              type: string
+            email:
+              maxLength: 256
+              nullable: true
+              type: string
+            html_url:
+              maxLength: 256
+              nullable: true
+              type: string
+            is_vendor:
+              type: boolean
+            location:
+              maxLength: 256
+              nullable: true
+              type: string
+            name:
+              maxLength: 512
+              type: string
+          required:
+            - name
+
+    ProviderNamespacesPage:
+      description: 'A page of a list of Provider Namespaces'
+      title: 'Provider Namespaces Page'
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            results:
+              title: 'ProviderNamespaces'
+              type: array
+              items:
+                $ref: '#/components/schemas/ProviderNamespace'
+          required:
+            - results
+
+    PulpBase:
+      description: 'A base class for Pulp objects'
+      type: object
+      properties:
+        _href:
+          title: ' href'
+          type: string
+          format: uri
+          readOnly: true
+        _created:
+          title: ' created'
+          type: string
+          description: Timestamp of creation.
+          format: date-time
+          readOnly: true
+
+    PulpCollection:
+      title: 'PulpCollection'
+      description: 'A Collection as stored in Pulp'
+      allOf:
+        - $ref: '#/components/schemas/PulpBase'
+        - type: object
+          properties:
+            _type:
+              title: ' type'
+              minLength: 1
+              type: string
+              readOnly: true
+            _artifact:
+              title: ' artifact'
+              type: string
+              description: Artifact file representing the physical content
+              format: uri
+            version:
+              title: Version
+              minLength: 1
+              type: string
+            name:
+              title: Name
+              minLength: 1
+              type: string
+            namespace:
+              title: Namespace
+              minLength: 1
+              type: string
+          required:
+            - _artifact
+            - name
+            - namespace
+            - version
+
+    PulpContentAnsibleCollectionsPage:
+      description: 'A page of a list of PulpContentAnsibleCollections'
+      title: 'Pulp ContentAnsibleCollections Page'
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            results:
+              title: 'PulpCollections'
+              type: array
+              items:
+                $ref: '#/components/schemas/PulpCollection'
+          required:
+            - results
+
+    PulpProgressReport:
+      type: object
+      properties:
+        message:
+          title: Message
+          minLength: 1
+          type: string
+          description: The message shown to the user for the progress report.
+          readOnly: true
+        state:
+          title: State
+          minLength: 1
+          type: string
+          description: >-
+            The current state of the progress report. The possible values are:
+            'waiting', 'skipped', 'running', 'completed', 'failed' and
+            'canceled'. The default is 'waiting'.
+          readOnly: true
+        total:
+          title: Total
+          type: integer
+          description: The total count of items to be handled by the ProgressBar.
+          readOnly: true
+        done:
+          title: Done
+          type: integer
+          description: The count of items already processed. Defaults to 0.
+          readOnly: true
+        suffix:
+          title: Suffix
+          minLength: 1
+          type: string
+          description: The suffix to be shown with the progress report.
+          nullable: true
+          readOnly: true
+
+    PulpTask:
+      title: 'Pulp Task'
+      description: 'A Pulp Task'
+      allOf:
+        - $ref: '#/components/schemas/PulpBase'
+        - type: object
+          required:
+            - name
+          properties:
+            state:
+              title: State
+              minLength: 1
+              type: string
+              description: >-
+                The current state of the task. The possible values include:
+                'waiting', 'skipped', 'running', 'completed', 'failed' and
+                'canceled'.
+              readOnly: true
+            name:
+              title: Name
+              minLength: 1
+              type: string
+              description: The name of task.
+            started_at:
+              title: Started at
+              type: string
+              description: Timestamp of the when this task started execution.
+              format: date-time
+              readOnly: true
+            finished_at:
+              title: Finished at
+              type: string
+              description: Timestamp of the when this task stopped execution.
+              format: date-time
+              readOnly: true
+            non_fatal_errors:
+              title: Non fatal errors
+              type: string
+              description: >-
+                A JSON Object of non-fatal errors encountered during the execution
+                of this task.
+              readOnly: true
+            error:
+              title: Error
+              type: string
+              description: >-
+                A JSON Object of a fatal error encountered during the execution of
+                this task.
+              readOnly: true
+            worker:
+              title: Worker
+              type: string
+              description: >-
+                The worker associated with this task. This field is empty if a
+                worker is not yet assigned.
+              format: uri
+              readOnly: true
+            parent:
+              title: Parent
+              type: string
+              description: The parent task that spawned this task.
+              format: uri
+              readOnly: true
+            spawned_tasks:
+              uniqueItems: true
+              type: array
+              description: Any tasks spawned by this task.
+              readOnly: true
+              items:
+                type: string
+                description: Any tasks spawned by this task.
+                format: uri
+            progress_reports:
+              type: array
+              readOnly: true
+              items:
+                $ref: '#/components/schemas/PulpProgressReport'
+            created_resources:
+              uniqueItems: true
+              type: array
+              description: Resources created by this task.
+              readOnly: true
+              items:
+                type: string
+                description: Resources created by this task.
+                format: uri
+
+
+    PulpTaskCancel:
+      required:
+        - state
+      type: object
+      properties:
+        state:
+          title: State
+          minLength: 1
+          type: string
+          description: The desired state of the task. Only 'canceled' is accepted.
+
+    PulpTasksPage:
+      description: "A Page of a list of Pulp Tasks"
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            results:
+              description: 'List of Pulp Tasks for this Page'
+              title: 'Pulp Tasks'
+              type: array
+              items:
+                $ref: '#/components/schemas/PulpTask'
+
+    Role:
+      description: 'An Ansible Role'
+      title: 'Role'
+      allOf:
+        - $ref: '#/components/schemas/V1BaseModel'
+        - type: object
+          properties:
+            company:
+              maxLength: 50
+              nullable: true
+              type: string
+            description:
+              maxLength: 255
+              type: string
+            download_count:
+              readOnly: true
+              type: string
+            download_rank:
+              type: number
+            imported:
+              format: date-time
+              nullable: true
+              type: string
+            is_valid:
+              readOnly: true
+              type: boolean
+            license:
+              maxLength: 50
+              type: string
+            min_ansible_version:
+              maxLength: 10
+              nullable: true
+              type: string
+            name:
+              maxLength: 512
+              type: string
+            relevance:
+              type: number
+            role_type:
+              readOnly: true
+              type: string
+            search_rank:
+              type: number
+            travis_status_url:
+              readOnly: true
+              type: string
+            username:
+              readOnly: true
+              type: string
+          required:
+            - name
+            - relevance
+            - search_rank
+            - download_rank
+
+    RolesPage:
+      description: "A Page of a list of Roles"
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            results:
+              description: 'List of Roles for this Page'
+              title: 'Roles'
+              type: array
+              items:
+                $ref: '#/components/schemas/Role'
+
+    SemanticVersion:
+      description: 'A version string in the Semantic Version form'
+      type: string
+      example: '1.0.1'
+
+    SemanticVersionSpec:
+      description: 'A string to match against SemanticVersion'
+      type: string
+      example: '>=1.0.0'
+
+    Tag:
+      title: 'Tag'
+      description: 'A Galaxy Tag'
+      allOf:
+        - $ref: '#/components/schemas/V1BaseModel'
+        - type: object
+          properties:
+            name:
+              maxLength: 512
+              type: string
+          required:
+            - name
+
+    TagsPage:
+      description: "A page of a list of Galaxy Tags"
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            results:
+              description: 'List of Tags for this Page'
+              title: 'Tags'
+              type: array
+              items:
+                $ref: '#/components/schemas/Tag'
+          required:
+            - results
+
+    User:
+      description: 'A User'
+      title: 'User'
+      allOf:
+        - $ref: '#/components/schemas/V1BaseModel'
+        - type: object
+          properties:
+            avatar_url:
+              maxLength: 256
+              type: string
+            date_joined:
+              format: date-time
+              type: string
+            full_name:
+              maxLength: 254
+              type: string
+            staff:
+              readOnly: true
+              type: string
+            username:
+              description: >-
+                Required. 30 characters or fewer. Letters, numbers and
+                @/./+/-/_ characters
+              maxLength: 30
+              pattern: '^[a-zA-Z0-9_.@+-]+$'
+              type: string
+          required:
+            - username
+
+    UsersPage:
+      description: "A page of a list of Users"
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            results:
+              description: 'List of Users for this Page'
+              title: 'Users'
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+          required:
+            - results
+
+    UserUpdate:
+      description: 'User data to update'
+      properties:
+        avatar_url:
+          maxLength: 256
+          type: string
+        date_joined:
+          format: date-time
+          type: string
+        full_name:
+          maxLength: 254
+          type: string
+        username:
+          description: >-
+            Required. 30 characters or fewer. Letters, numbers and
+            @/./+/-/_ characters
+          maxLength: 30
+          pattern: '^[a-zA-Z0-9_.@+-]+$'
+          type: string
+
+    V1BaseModel:
+      description: 'Base for common v1 shared model attributes'
+      type: object
+      properties:
+        id:
+          description: 'Database ID for this object.'
+          readOnly: true
+          type: integer
+        url:
+          description: 'URL for this resource.'
+          readOnly: true
+          type: string
+          format: uri
+        related:
+          description: 'Data structure with URLs of related resources.'
+          readOnly: true
+          type: object
+          additionalProperties:
+            type: string
+        summary_fields:
+          description: >-
+            Data structure with name/description for related
+            resources.
+          readOnly: true
+          type: object
+          additionalProperties: {}
+        active:
+          readOnly: true
+          type: string
+        modified:
+          description: 'Timestamp when this object was last modified.'
+          readOnly: true
+          type: string
+        created:
+          description: 'Timestamp when this object was created.'
+          readOnly: true
+          type: string
+      required:
+        - id
+
+  responses:
+
+    CollectionImportAccepted:
+      description: 'Result of an accepted collection import. Includes the url of the import task'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionCreationResult'
+
+    CollectionVersionLinks:
+      description: 'Response containing a page of CollectionVersionLinks'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionVersionLinksPage'
+
+    CollectionVersion:
+      description: 'Response contain a CollectionVersion'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionVersion'
+      links:
+        GetCollectionVersionById:
+          operationId: GetCollectionVersionById
+          parameters:
+            id: '$response.body#/id'
+          description: >
+            The `id` value returned in the response can be used as
+            the `id` parameter in `{method} GET /collection-versions/{id}`.
+        GetCollectionById:
+          operationId: GetCollectionById
+          parameters:
+            id: '$response.body#/collection/id'
+        DownloadArtifactByFilename:
+          operationId: DownloadArtifactByFilename
+          parameters:
+            id: '$response.body#/artifact/filename'
+          description: >
+            The `filename` value returned in the response can be used as
+            the `filename` parameter in `GET /download/{filename}`.
+
+    CollectionVersionArtifact:
+      description: 'The collection version artifact details with download_url, sha256, and filename'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionVersionArtifactDetail'
+
+    CollectionVersionArtifacts:
+      description: 'Response containing a page of CollectionVersionArtifacts'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionVersionArtifactsPage'
+
+    CollectionVersionArtifactDownload:
+      description: 'The collection artifact file binary contents'
+      content:
+        application/octet-stream:
+          schema:
+            title: 'CollectionVersionArtifactDownload'
+            description: 'The collection artifact file binary contents'
+            type: string
+            format: binary
+
+    Conflict:
+      description: 'Conflict Error'
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/ConflictError'
+            discriminator:
+              propertyName: code
+              mapping:
+                conflict: '#/components/schemas/ConflictError'
+                conflict.collection_exists: '#/components/schemas/ConflictCollectionExistsError'
+                conflict.repository_name_conflict: '#/compontents/schemas/RepositoryNameError'
+                conflict.artifact_exists: '#/compontents/schemas/ArtifactExistsError'
+
+    Contents:
+      description: 'Response containing a Page of Content search results'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ContentsPage'
+
+    DeleteSuccessful:
+      description: 'A DELETE operation was successful'
+
+    Namespace:
+      description: 'Result of creating a Namespace'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Namespace'
+
+    Namespaces:
+      description: 'Response containing a Page of a list of Namespaces'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NamespacesPage'
+
+    NotFound:
+      description: 'Not Found (404)'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIException'
+
+    ProviderNamespace:
+      description: 'Result of creating a Provider Namespace'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProviderNamespace'
+
+    ProviderNamespaces:
+      description: 'Response containing a Page of a list of Provider Namespaces'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProviderNamespacesPage'
+
+    PulpContentAnsibleCollections:
+      description: "Response from getting pulp collection content"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PulpContentAnsibleCollectionsPage'
+
+    PulpTasks:
+      description: 'Response containing a Page of a list of Pulp Tasks'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PulpTasksPage'
+
+    Roles:
+      description: 'Response containing a Page of a list of Roles'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RolesPage'
+
+    Tags:
+      description: 'Response containing a Page of a list of Tags'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TagsPage'
+
+    Unauthorized:
+      description: 'Authorization error'
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/APIException'
+
+    Users:
+      description: 'Response containing a Page of a list of Users'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UsersPage'
+
+  parameters:
+    CollectionId:
+      description: 'The Collection id'
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+
+    CollectionNamespace:
+      description: 'The collection namespace'
+      in: path
+      name: namespace
+      required: true
+      schema:
+        type: string
+
+    CollectionName:
+      description: 'The collection name'
+      in: path
+      name: name
+      required: true
+      schema:
+        type: string
+        pattern: ^(?!.*__)[a-z]+[0-9a-z_]*$'
+
+    CollectionVersionArtifactFilename:
+      description: 'CollectionVersion artifact filename'
+      in: path
+      name: filename
+      required: true
+      schema:
+        type: string
+
+    CollectionVersionArtifactId:
+      description: 'CollectionVersion artifact ID'
+      in: path
+      name: artifact_id
+      required: true
+      schema:
+        type: string
+
+    NamespaceId:
+      description: 'The Namespace id'
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+
+    Page:
+      description: 'Page number within the paginated result set.'
+      in: query
+      name: page
+      required: false
+      schema:
+        type: integer
+        default: 1
+
+    PageSize:
+      description: 'Number of results to return per page.'
+      in: query
+      name: page_size
+      required: false
+      schema:
+        type: integer
+        default: 10
+        minimum: 0
+        maximum: 1000
+
+    ProviderNamespaceId:
+      description: 'The Provider Namespace id'
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+
+    Search:
+      description: 'Term to search for'
+      in: query
+      name: search
+      required: false
+      schema:
+        type: string
+
+    SemanticVersion:
+      description: 'A Semantic Version string'
+      in: path
+      name: version
+      required: true
+      schema:
+        type: string
+        pattern: ^((([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$
+
+    TagId:
+      description: 'Tag id'
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+
+    UserId:
+      description: 'User id'
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
+
+  requestBodies:
+    CollectionVersionArtifactBody:
+      description: "A multipart/form encoded payload including the binary collection artifact file contents and it's sha256sum"
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '#/components/schemas/CollectionVersionArtifactData'
+
+    Namespace:
+      description: "A Namespace body"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Namespace'
+
+    ProviderNamespace:
+      description: "A Provider Namespace body"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ProviderNamespace'
+
+  securitySchemes:
+    # FIXME: kind of faking rbac
+    AdminBasicAuth:
+      type: http
+      scheme: basic
+    UserBasicAuth:
+      type: http
+      scheme: basic
+    UserTokenApiKey:
+      description: Provide a Galaxy API token in "Authorization" header with value in form "Token {api_key}"
+      type: apiKey
+      in: header
+      name: Authorization
+    AdminTokenApiKey:
+      description: Provide a Galaxy API token in "Authorization" header with value in form "Token {api_key}"
+      type: apiKey
+      in: header
+      name: Authorization
