@@ -38,8 +38,6 @@ tags:
     description: 'API endpoints from the v2 API'
   - name: 'me'
     description: 'API related to the current user.'
-  - name: 'pulp'
-    description: 'API related to Pulp'
   - name: 'search'
     description: 'API for searching'
   - name: 'namespaces'
@@ -47,7 +45,7 @@ tags:
   - name: 'tags'
     description: 'API for Ansible Galaxy tags.'
   - name: 'tasks'
-    description: 'API for Pulp tasks'
+    description: 'API for Tasks'
   - name: 'users'
     description: 'API for Users'
   - name: 'v1'
@@ -226,7 +224,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CollectionImportResult'
+                $ref: '#/components/schemas/CollectionImportTask'
 
   '/collection-versions/{id}/artifact/':
     get:
@@ -529,282 +527,6 @@ paths:
         - provider_namespaces
         - v3
 
-  '/pulp/content/ansible/collections/':
-    get:
-      tags:
-        - collections
-        - pulp
-        - v3
-      summary: List collections
-      description: |
-        Wrapper for https://pulp-ansible.readthedocs.io/en/latest/restapi.html#operation/content_ansible_collections_list
-      operationId: GetPulpContentAnsibleCollections
-      parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
-        - $ref: '#/components/parameters/Search'
-        - name: name
-          in: query
-          description: Filter results where name matches value
-          schema:
-            type: string
-        - name: namespace
-          in: query
-          description: Filter results where namespace matches value
-          schema:
-            type: string
-        - name: version
-          in: query
-          description: Filter results where version matches value
-          schema:
-            type: string
-        - name: repository_version
-          in: query
-          description: Repository Version referenced by HREF
-          schema:
-            type: string
-        - name: repository_version_added
-          in: query
-          description: Repository Version referenced by HREF
-          schema:
-            type: string
-        - name: repository_version_removed
-          in: query
-          description: Repository Version referenced by HREF
-          schema:
-            type: string
-      responses:
-        200:
-          $ref: '#/components/responses/PulpContentAnsibleCollections'
-
-    post:
-      summary: Create a collection
-      description: |
-        ViewSet for Ansible Collection.
-        Wrapper for https://pulp-ansible.readthedocs.io/en/latest/restapi.html#operation/content_ansible_collections_create
-      operationId: content_ansible_collections_create
-      tags:
-        - pulp
-        - collections
-        - v3
-      security:
-        - UserTokenApiKey: []
-        - UserBasicAuth: []
-        - AdminTokenApiKey: []
-        - AdminBasicAuth: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PulpCollection'
-        required: true
-      responses:
-        201:
-          description: ""
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PulpCollection'
-
-  # Could just make this /tasks/
-  '/pulp/tasks/':
-    get:
-      tags:
-        - tasks
-        - pulp
-        - v3
-      summary: List tasks
-      description: 'Wrapper for Pulp API GET /pulp/api/v3/tasks/'
-      operationId: GetPulpTasks
-      parameters:
-        - $ref: '#/components/parameters/Page'
-        - $ref: '#/components/parameters/PageSize'
-        - $ref: '#/components/parameters/Search'
-        - name: ordering
-          in: query
-          description: Which field to use when ordering the results.
-          schema:
-            type: string
-        - name: state
-          in: query
-          schema:
-            type: string
-        - name: state__in
-          in: query
-          description: Filter results where state is in a comma-separated list of values
-          schema:
-            type: string
-        - name: worker
-          in: query
-          description: Foreign Key referenced by HREF
-          schema:
-            type: string
-        - name: worker__in
-          in: query
-          description: Filter results where worker is in a comma-separated list of values
-          schema:
-            type: string
-        - name: name__contains
-          in: query
-          description: Filter results where name contains value
-          schema:
-            type: string
-        - name: started_at__lt
-          in: query
-          description: Filter results where started_at is less than value
-          schema:
-            type: string
-        - name: started_at__lte
-          in: query
-          description: Filter results where started_at is less than or equal to value
-          schema:
-            type: string
-        - name: started_at__gt
-          in: query
-          description: Filter results where started_at is greater than value
-          schema:
-            type: string
-        - name: started_at__gte
-          in: query
-          description: Filter results where started_at is greater than or equal to value
-          schema:
-            type: string
-        - name: started_at__range
-          in: query
-          description: >-
-            Filter results where started_at is between two comma separated
-            values
-          schema:
-            type: string
-        - name: finished_at__lt
-          in: query
-          description: Filter results where finished_at is less than value
-          schema:
-            type: string
-        - name: finished_at__lte
-          in: query
-          description: Filter results where finished_at is less than or equal to value
-          schema:
-            type: string
-        - name: finished_at__gt
-          in: query
-          description: Filter results where finished_at is greater than value
-          schema:
-            type: string
-        - name: finished_at__gte
-          in: query
-          description: Filter results where finished_at is greater than or equal to value
-          schema:
-            type: string
-        - name: finished_at__range
-          in: query
-          description: >-
-            Filter results where finished_at is between two comma separated
-            values
-          schema:
-            type: string
-        - name: parent
-          in: query
-          description: Foreign Key referenced by HREF
-          schema:
-            type: string
-        - name: name
-          in: query
-          schema:
-            type: string
-        - name: started_at
-          in: query
-          description: ISO 8601 formatted dates are supported
-          schema:
-            type: string
-        - name: finished_at
-          in: query
-          description: ISO 8601 formatted dates are supported
-          schema:
-            type: string
-      responses:
-        '200':
-          $ref: '#/components/responses/PulpTasks'
-
-  '/pulp/tasks/{pulp_task_id}':
-    get:
-      tags:
-        - tasks
-        - pulp
-        - v3
-      summary: Inspect a task
-      description: "Wrapper API for Pulp GET {task_href} aka GET /pulp/api/v3/tasks/{task_id}"
-      operationId: GetPulpTask
-      parameters:
-        - name: pulp_task_id
-          in: path
-          description: 'ID of Task. e.g.: "1" in /pulp/api/v3/tasks/1/'
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PulpTask'
-    delete:
-      tags:
-        - tasks
-        - pulp
-        - v3
-      summary: Delete a task
-      operationId: DeletePulpTask
-      parameters:
-        - name: pulp_task_id
-          in: path
-          description: 'ID of Task. e.g.: /pulp/api/v3/tasks/1/'
-          required: true
-          schema:
-            type: string
-      security:
-        - UserTokenApiKey: []
-        - UserBasicAuth: []
-        - AdminTokenApiKey: []
-        - AdminBasicAuth: []
-      responses:
-        204:
-          description: A DELETE operation was successful
-    patch:
-      tags:
-        - tasks
-        - pulp
-        - v3
-      summary: Cancel a task
-      description: This operation cancels a task.
-      operationId: PatchPulpTask
-      parameters:
-        - name: pulp_task_id
-          in: path
-          description: 'ID of Task. e.g.: /pulp/api/v3/tasks/1/'
-          required: true
-          schema:
-            type: string
-      security:
-        - UserTokenApiKey: []
-        - UserBasicAuth: []
-        - AdminTokenApiKey: []
-        - AdminBasicAuth: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PulpTaskCancel'
-        required: true
-      responses:
-        '200':
-          description: ''
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PulpTask'
-
   '/search/':
     get:
       summary: 'Get info about the search API'
@@ -951,6 +673,188 @@ paths:
               schema:
                 $ref: '#/components/schemas/Tag'
 
+  '/tasks/':
+    get:
+      tags:
+        - tasks
+        - v3
+      summary: List tasks
+      description: 'Get info about Tasks (mostly wrapper around /pulp/api/v3/tasks/)'
+      operationId: GetTasks
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/TaskType'
+        - name: ordering
+          in: query
+          description: Which field to use when ordering the results.
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+        - name: state__in
+          in: query
+          description: Filter results where state is in a comma-separated list of values
+          schema:
+            type: string
+        - name: name__contains
+          in: query
+          description: Filter results where name contains value
+          schema:
+            type: string
+        - name: started_at__lt
+          in: query
+          description: Filter results where started_at is less than value
+          schema:
+            type: string
+        - name: started_at__lte
+          in: query
+          description: Filter results where started_at is less than or equal to value
+          schema:
+            type: string
+        - name: started_at__gt
+          in: query
+          description: Filter results where started_at is greater than value
+          schema:
+            type: string
+        - name: started_at__gte
+          in: query
+          description: Filter results where started_at is greater than or equal to value
+          schema:
+            type: string
+        - name: started_at__range
+          in: query
+          description: >-
+            Filter results where started_at is between two comma separated
+            values
+          schema:
+            type: string
+        - name: finished_at__lt
+          in: query
+          description: Filter results where finished_at is less than value
+          schema:
+            type: string
+        - name: finished_at__lte
+          in: query
+          description: Filter results where finished_at is less than or equal to value
+          schema:
+            type: string
+        - name: finished_at__gt
+          in: query
+          description: Filter results where finished_at is greater than value
+          schema:
+            type: string
+        - name: finished_at__gte
+          in: query
+          description: Filter results where finished_at is greater than or equal to value
+          schema:
+            type: string
+        - name: finished_at__range
+          in: query
+          description: >-
+            Filter results where finished_at is between two comma separated
+            values
+          schema:
+            type: string
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: started_at
+          in: query
+          description: ISO 8601 formatted dates are supported
+          schema:
+            type: string
+        - name: finished_at
+          in: query
+          description: ISO 8601 formatted dates are supported
+          schema:
+            type: string
+      responses:
+        '200':
+          # TODO: polymorphic?
+          $ref: '#/components/responses/Tasks'
+
+  '/tasks/{task_id}':
+    get:
+      tags:
+        - tasks
+        - v3
+      summary: Inspect a task
+      description: "Get a Task by task_id (wrapper-ish for Pulp GET {task_href} aka GET /pulp/api/v3/tasks/{task_id})"
+      operationId: GetTask
+      parameters:
+        - name: task_id
+          in: path
+          description: 'ID of Task. e.g.: "1" in /tasks/1/'
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'A Task object'
+          content:
+            application/json:
+              # TODO: can be anyOf polymorphic Tasks
+              schema:
+                $ref: '#/components/schemas/Task'
+    delete:
+      tags:
+        - tasks
+        - v3
+      summary: Delete a task
+      operationId: DeleteTask
+      parameters:
+        - name: task_id
+          in: path
+          description: 'ID of Task. e.g.: /tasks/1/'
+          required: true
+          schema:
+            type: string
+      security:
+        - UserTokenApiKey: []
+        - UserBasicAuth: []
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      responses:
+        204:
+          description: A DELETE operation was successful
+    patch:
+      tags:
+        - tasks
+        - v3
+      summary: Cancel a task
+      description: This operation cancels a task.
+      operationId: PatchTask
+      parameters:
+        - name: task_id
+          in: path
+          description: 'ID of Task. e.g.: /tasks/1/'
+          required: true
+          schema:
+            type: string
+      security:
+        - UserTokenApiKey: []
+        - UserBasicAuth: []
+        - AdminTokenApiKey: []
+        - AdminBasicAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCancel'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+
   '/users/':
     get:
       summary: 'Get a list of Users'
@@ -1080,6 +984,7 @@ components:
           type: string
 
     CollectionImportError:
+      title: 'CollectionImportError'
       type: object
       properties:
         code:
@@ -1090,6 +995,7 @@ components:
           type: string
 
     CollectionImportMessage:
+      title: 'CollectionImportError'
       description: 'Message from collection importer including lint results'
       type: object
       properties:
@@ -1106,6 +1012,7 @@ components:
         - time
 
     CollectionImportLintRecord:
+      title: 'CollectionImportLintRecord'
       description: 'Records from collection linters'
       type: object
       properties:
@@ -1122,6 +1029,7 @@ components:
           nullable: true
 
     CollectionCreationResult:
+      title: 'CollectionCreationResult'
       description: 'A map of collection import task info, including its url'
       type: object
       properties:
@@ -1130,15 +1038,31 @@ components:
           type: string
           format: uri
 
-    CollectionImportResult:
-      description: 'Collection import result'
+    CollectionImportTask:
+      description: 'Collection import task detail'
+      title: 'CollectionImportTask'
       type: object
       properties:
+        _href:
+          description: 'URL for this CollectionImportTask'
+          type: string
+          format: uri
+        task_type:
+          $ref: '#/components/schemas/TaskType'
+        name:
+          maxLength: 64
+          type: string
         error:
           $ref: '#/components/schemas/CollectionImportError'
         finished_at:
           type: string
           format: date-time
+        started_at:
+          type: string
+          format: date-time
+        state:
+          type: string
+        # CollectionImportTasks specific
         id:
           type: integer
         imported_version:
@@ -1149,21 +1073,15 @@ components:
           format: uuid
         lint_records:
           type: array
+          title: 'CollectionImportLintRecords'
           items:
             $ref: '#/components/schemas/CollectionImportLintRecord'
         messages:
           type: array
+          title: 'CollectionImportMessages'
           items:
             $ref: '#/components/schemas/CollectionImportMessage'
-        name:
-          maxLength: 64
-          type: string
         namespace:
-          type: string
-        started_at:
-          type: string
-          format: date-time
-        state:
           type: string
         version:
           maxLength: 64
@@ -1637,220 +1555,6 @@ components:
           required:
             - results
 
-    PulpBase:
-      description: 'A base class for Pulp objects'
-      type: object
-      properties:
-        _href:
-          title: ' href'
-          type: string
-          format: uri
-          readOnly: true
-        _created:
-          title: ' created'
-          type: string
-          description: Timestamp of creation.
-          format: date-time
-          readOnly: true
-
-    PulpCollection:
-      title: 'PulpCollection'
-      description: 'A Collection as stored in Pulp'
-      allOf:
-        - $ref: '#/components/schemas/PulpBase'
-        - type: object
-          properties:
-            _type:
-              title: ' type'
-              minLength: 1
-              type: string
-              readOnly: true
-            _artifact:
-              title: ' artifact'
-              type: string
-              description: Artifact file representing the physical content
-              format: uri
-            version:
-              title: Version
-              minLength: 1
-              type: string
-            name:
-              title: Name
-              minLength: 1
-              type: string
-            namespace:
-              title: Namespace
-              minLength: 1
-              type: string
-          required:
-            - _artifact
-            - name
-            - namespace
-            - version
-
-    PulpContentAnsibleCollectionsPage:
-      description: 'A page of a list of PulpContentAnsibleCollections'
-      title: 'Pulp ContentAnsibleCollections Page'
-      allOf:
-        - $ref: '#/components/schemas/PageInfo'
-        - type: object
-          properties:
-            results:
-              title: 'PulpCollections'
-              type: array
-              items:
-                $ref: '#/components/schemas/PulpCollection'
-          required:
-            - results
-
-    PulpProgressReport:
-      type: object
-      properties:
-        message:
-          title: Message
-          minLength: 1
-          type: string
-          description: The message shown to the user for the progress report.
-          readOnly: true
-        state:
-          title: State
-          minLength: 1
-          type: string
-          description: >-
-            The current state of the progress report. The possible values are:
-            'waiting', 'skipped', 'running', 'completed', 'failed' and
-            'canceled'. The default is 'waiting'.
-          readOnly: true
-        total:
-          title: Total
-          type: integer
-          description: The total count of items to be handled by the ProgressBar.
-          readOnly: true
-        done:
-          title: Done
-          type: integer
-          description: The count of items already processed. Defaults to 0.
-          readOnly: true
-        suffix:
-          title: Suffix
-          minLength: 1
-          type: string
-          description: The suffix to be shown with the progress report.
-          nullable: true
-          readOnly: true
-
-    PulpTask:
-      title: 'Pulp Task'
-      description: 'A Pulp Task'
-      allOf:
-        - $ref: '#/components/schemas/PulpBase'
-        - type: object
-          required:
-            - name
-          properties:
-            state:
-              title: State
-              minLength: 1
-              type: string
-              description: >-
-                The current state of the task. The possible values include:
-                'waiting', 'skipped', 'running', 'completed', 'failed' and
-                'canceled'.
-              readOnly: true
-            name:
-              title: Name
-              minLength: 1
-              type: string
-              description: The name of task.
-            started_at:
-              title: Started at
-              type: string
-              description: Timestamp of the when this task started execution.
-              format: date-time
-              readOnly: true
-            finished_at:
-              title: Finished at
-              type: string
-              description: Timestamp of the when this task stopped execution.
-              format: date-time
-              readOnly: true
-            non_fatal_errors:
-              title: Non fatal errors
-              type: string
-              description: >-
-                A JSON Object of non-fatal errors encountered during the execution
-                of this task.
-              readOnly: true
-            error:
-              title: Error
-              type: string
-              description: >-
-                A JSON Object of a fatal error encountered during the execution of
-                this task.
-              readOnly: true
-            worker:
-              title: Worker
-              type: string
-              description: >-
-                The worker associated with this task. This field is empty if a
-                worker is not yet assigned.
-              format: uri
-              readOnly: true
-            parent:
-              title: Parent
-              type: string
-              description: The parent task that spawned this task.
-              format: uri
-              readOnly: true
-            spawned_tasks:
-              uniqueItems: true
-              type: array
-              description: Any tasks spawned by this task.
-              readOnly: true
-              items:
-                type: string
-                description: Any tasks spawned by this task.
-                format: uri
-            progress_reports:
-              type: array
-              readOnly: true
-              items:
-                $ref: '#/components/schemas/PulpProgressReport'
-            created_resources:
-              uniqueItems: true
-              type: array
-              description: Resources created by this task.
-              readOnly: true
-              items:
-                type: string
-                description: Resources created by this task.
-                format: uri
-
-
-    PulpTaskCancel:
-      required:
-        - state
-      type: object
-      properties:
-        state:
-          title: State
-          minLength: 1
-          type: string
-          description: The desired state of the task. Only 'canceled' is accepted.
-
-    PulpTasksPage:
-      description: "A Page of a list of Pulp Tasks"
-      allOf:
-        - $ref: '#/components/schemas/PageInfo'
-        - type: object
-          properties:
-            results:
-              description: 'List of Pulp Tasks for this Page'
-              title: 'Pulp Tasks'
-              type: array
-              items:
-                $ref: '#/components/schemas/PulpTask'
-
     Role:
       description: 'An Ansible Role'
       title: 'Role'
@@ -1944,6 +1648,7 @@ components:
 
     TagsPage:
       description: "A page of a list of Galaxy Tags"
+      title: 'Tags Page'
       allOf:
         - $ref: '#/components/schemas/PageInfo'
         - type: object
@@ -1956,6 +1661,94 @@ components:
                 $ref: '#/components/schemas/Tag'
           required:
             - results
+
+    Task:
+      description: "Info and status about a Task"
+      title: 'Task'
+      type: object
+      properties:
+        _href:
+          description: 'URL for this Task details'
+          type: string
+          format: uri
+          example: '/collection-imports/37'
+        error:
+          type: string
+          readOnly: true
+        finished_at:
+          type: string
+          format: date-time
+          readOnly: true
+        name:
+          maxLength: 64
+          type: string
+          readOnly: true
+        # TODO: possibly not needed if requiring clients to follow the _href above for details is OK
+        detail:
+          description: "Details specific to the task type"
+          oneOf:
+            - $ref: '#/components/schemas/CollectionImportTask'
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+        state:
+          type: string
+          readOnly: true
+        task_type:
+          $ref: '#/components/schemas/TaskType'
+      required:
+        - error
+        - finished_at
+        - name
+        - started_at
+        - state
+        - task_type
+
+    TaskCancel:
+      required:
+        - state
+      type: object
+      properties:
+        state:
+          title: State
+          type: string
+          description: The desired state of the task. Only 'canceled' is accepted.
+          enum:
+            - 'canceled'
+
+    TaskLink:
+      description: 'An object with the href for a Task'
+      type: object
+      properties:
+        _href:
+          description: "The href for a Task"
+          type: string
+          format: uri
+      required:
+        - _href
+
+    TasksPage:
+      description: "A page of a list of Tasks"
+      title: 'Tasks Page'
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            results:
+              description: 'List of Tasks for this Page'
+              title: 'Tasks'
+              type: array
+              items:
+                $ref: '#/components/schemas/Task'
+          required:
+            - results
+
+    TaskType:
+      description: 'The type of Task'
+      type: string
+      enum:
+        - 'collection-import'
 
     User:
       description: 'A User'
@@ -2187,20 +1980,6 @@ components:
           schema:
             $ref: '#/components/schemas/ProviderNamespacesPage'
 
-    PulpContentAnsibleCollections:
-      description: "Response from getting pulp collection content"
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PulpContentAnsibleCollectionsPage'
-
-    PulpTasks:
-      description: 'Response containing a Page of a list of Pulp Tasks'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/PulpTasksPage'
-
     Roles:
       description: 'Response containing a Page of a list of Roles'
       content:
@@ -2214,6 +1993,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TagsPage'
+
+    Tasks:
+      description: 'Response containing a Page of a list of Tasks'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TasksPage'
 
     Unauthorized:
       description: 'Authorization error'
@@ -2335,6 +2121,14 @@ components:
       required: true
       schema:
         type: string
+
+    TaskType:
+      description: 'Task type'
+      in: query
+      name: task_type
+      required: false
+      schema:
+        $ref: '#/components/schemas/TaskType'
 
     UserId:
       description: 'User id'
