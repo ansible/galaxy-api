@@ -1,0 +1,249 @@
+openapi: "3.0.0"
+
+info:
+  version: 0.1.0
+  title: Galaxy API
+  license:
+    name: Apache-2.0
+
+paths:
+
+# -------------------------------------
+# Namespaces
+# -------------------------------------
+  '/namespaces/':
+    get:
+      summary: List namespaces
+      operationId: listNamespaces
+      tags:
+        - Namespaces
+      responses:
+        '200':
+          description: A paginated list of namespaces
+        'default':
+          description: Error
+    post:
+      summary: Create a namespace
+      tags:
+        - Namespaces
+      responses:
+        '201':
+          description: Namespace created successfully
+        'default':
+          description: Error
+
+  '/namespaces/{name}/':
+    get:
+      summary: Get Namespace
+      operationId: getNamespace
+      tags:
+        - Namespaces
+      responses:
+        '200':
+          description: The requested Namespace
+        'default':
+          description: Error
+    put:
+      summary: Update Namespace
+      operationId: updateNamespace
+      tags:
+        - Namespaces
+      responses:
+        '200':
+          description: Namespace updated successfully
+        'default':
+          description: Error
+    delete:
+      summary: Delete Namespace
+      operationId: deleteNamespace
+      tags:
+        - Namespaces
+      responses:
+        '204':
+          description: Namespace deleted successfully
+        'default':
+          description: Error
+
+# -------------------------------------
+# Collections
+# -------------------------------------
+  '/collections/':
+    get:
+      summary: List Collections
+      operationId: listCollections
+      tags:
+        - Collections
+      responses:
+        '200':
+          description: A paginated list of collections
+        'default':
+          description: Error
+    post:
+      summary: Upload Collection
+      operationId: uploadCollection
+      tags:
+        - Collections
+
+  '/collections/{namespace}/{name}/':
+    get:
+      summary: Get Collection
+      operationId: getCollection
+      tags:
+        - Collections
+      responses:
+        '200':
+          description: The requested Collection
+        'default':
+          description: Error
+
+
+    put:
+      summary: Update Collection
+      operationId: updateCollection
+      tags:
+        - Collections
+
+  '/collections/{namespace}/{name}/versions/':
+    get:
+      summary: List Collection Versions
+      operationId: listCollectionVersions
+      tags:
+        - Collections
+      responses:
+        '200':
+          description: A paginated list of Collection Versions
+        'default':
+          description: Error
+
+  '/collections/{namespace}/{name}/versions/{version}/':
+    get:
+      summary: Get Collection Version
+      operationId: getCollectionVersions
+      tags:
+        - Collections
+      responses:
+        '200':
+          description: The requested Collection Version
+        'default':
+          description: Error
+
+  '/collections/{namespace}/{name}/versions/{version}/artifact/':
+    get:
+      summary: Get Collection Version
+      operationId: getCollectionVersionArtifact
+      tags:
+        - Collections
+      responses:
+        '200':
+          description: The requested Collection Version Artifact
+        'default':
+          description: Error
+
+# -------------------------------------
+# Imports
+# -------------------------------------
+  '/imports/collections/':
+    get:
+      summary: List Collection Imports
+      operationId: listCollectionImports
+      tags:
+        - Imports
+      responses:
+        '200':
+          description: A paginated list of Collection Imports
+        'default':
+          description: Error
+
+  '/imports/collections/{id}/':
+    get:
+      summary: Get Collection Import
+      operationId: getCollectionImport
+      tags:
+        - Imports
+      responses:
+        '200':
+          description: The requested Collection Import
+        'default':
+          description: Error
+
+# -------------------------------------
+# Downloads
+# -------------------------------------
+  '/downloads/collections/{filename}':
+    get:
+      summary: Download Collection Artifact
+      operationId: downloadCollection
+      tags:
+        - Downloads
+
+# -------------------------------------
+# Search
+# -------------------------------------
+  '/search/collections/':
+    get:
+      summary: Search Collections
+      operationId: searchCollections
+      tags:
+        - Search
+      responses:
+        '200':
+          description: A paginated list of Collections
+        'default':
+          description: Error
+
+  '/search/tags/':
+    get:
+      summary: Search Tags
+      operationId: searchTags
+      tags:
+        - Search
+      responses:
+        '200':
+          description: A paginated list of Tags
+        'default':
+          description: Error
+
+# -------------------------------------
+# Users
+# -------------------------------------
+  '/users/':
+    get:
+      summary: List Users
+      operationId: listUsers
+      tags:
+        - Users
+      responses:
+        '200':
+          description: A paginated list of Users
+        'default':
+          description: Error
+
+
+  '/users/{id}/':
+    get:
+      summary: Get User
+      operationId: getUser
+      tags:
+        - Users
+      responses:
+        '200':
+          description: The requested User
+        'default':
+          description: Error
+
+
+# -------------------------------------
+# Profile
+# -------------------------------------
+  '/profile/':
+    get:
+      summary: Get Profile
+      operationId: getProfile
+      description: Returns information about the current User.
+      tags:
+        - Profile
+      responses:
+        '200':
+          description: The current User
+        'default':
+          description: Error
