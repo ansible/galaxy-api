@@ -94,6 +94,20 @@ STATIC_URL = '/static/'
 # Third party libraries settings
 # ---------------------------------------------------------
 
+# Rest Framework
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'galaxy_api.auth.auth.RHIdentityAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+        'galaxy_api.auth.auth.RHEntitlementRequired',
+    ]
+}
+
+RH_ENTITLEMENT_REQUIRED = 'insights'
+
 # ---------------------------------------------------------
 # Application settings
 # ---------------------------------------------------------

@@ -2,7 +2,7 @@ from django.contrib.auth import models as auth_models
 from django.contrib.auth import validators as auth_validators
 from django.db import migrations
 from django.db import models
-import django.utils.timezone
+from django.utils import timezone
 
 
 class Migration(migrations.Migration):
@@ -101,7 +101,7 @@ class Migration(migrations.Migration):
                 (
                     "date_joined",
                     models.DateTimeField(
-                        default=django.utils.timezone.now,
+                        default=timezone.now,
                         verbose_name="date joined"
                     ),
                 ),
@@ -135,6 +135,20 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "users",
                 "abstract": False,
             },
-            managers=[("objects", django.contrib.auth.models.UserManager())],
-        )
+            managers=[("objects", auth_models.UserManager())],
+        ),
+        migrations.CreateModel(
+            name='Tenant',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False,
+                                        verbose_name='ID')),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('name', models.CharField(max_length=150, unique=True)),
+                ('users', models.ManyToManyField(related_name='tenants', to='galaxy_auth.User')),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
     ]
