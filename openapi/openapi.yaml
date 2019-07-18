@@ -247,3 +247,85 @@ paths:
           description: The current User
         'default':
           description: Error
+components:
+  schemas:
+
+    PageCount:
+      description: 'The number of items in this Page'
+      type: integer
+      example: 5
+
+    PageInfo:
+      description: 'Pagination info'
+      title: 'Page Info'
+      properties:
+        meta:
+          $ref: '#/components/schemas/PageMeta'
+        links:
+          $ref: '#/components/schemas/PageLinks'
+      required:
+        - meta
+        - links
+
+    PageLinks:
+      type: object
+      title: 'PageLinks'
+      properties:
+        first:
+          type: string
+          description: 'Link to first page'
+          format: uri
+          example: '/namespaces/?offset=0&limit=1'
+        last:
+          type: string
+          description: 'Link to last page'
+          format: uri
+          example: '/namespaces/?offset=7&limit=1'
+        next:
+          type: string
+          description: 'Link to next page'
+          format: uri
+          example: '/namespaces/?offset=5&limit=1'
+          nullable: true
+        previous:
+          type: string
+          description: 'Link to next page'
+          format: uri
+          example: '/namespaces/?offset=3&limit=1'
+          nullable: true
+      required:
+        - first
+        - last
+        - next
+        - previous
+
+    PageMeta:
+      title: 'PageMeta'
+      type: object
+      properties:
+        count:
+          $ref: '#/components/schemas/PageCount'
+      required:
+        - count
+
+  parameters:
+    PageLimit:
+      description: 'Number of results to return per page.'
+      in: query
+      name: limit
+      required: false
+      schema:
+        type: integer
+        default: 10
+        minimum: 1
+        maximum: 100
+
+    PageOffset:
+      description: 'Page offset number within the paginated result set'
+      in: query
+      name: offset
+      required: false
+      schema:
+        type: integer
+        default: 0
+        minimum: 0
