@@ -250,11 +250,6 @@ paths:
 components:
   schemas:
 
-    PageCount:
-      description: 'The number of items in this Page'
-      type: integer
-      example: 5
-
     PageInfo:
       description: 'Pagination info'
       title: 'Page Info'
@@ -304,7 +299,9 @@ components:
       type: object
       properties:
         count:
-          $ref: '#/components/schemas/PageCount'
+          description: 'The number of items in this Page'
+          type: integer
+          example: 5
       required:
         - count
 
