@@ -19,16 +19,22 @@ paths:
         - Namespaces
       responses:
         '200':
-          description: A paginated list of namespaces
+          description: 'Paginated list of Namespaces'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NamespacesPage'
         'default':
           $ref: '#/components/responses/Errors'
     post:
       summary: Create a namespace
       tags:
         - Namespaces
+      requestBody:
+        $ref: '#/components/requestBodies/Namespace'
       responses:
         '201':
-          description: Namespace created successfully
+          $ref: '#/components/responses/Namespace'
         'default':
           $ref: '#/components/responses/Errors'
 
@@ -40,7 +46,7 @@ paths:
         - Namespaces
       responses:
         '200':
-          description: The requested Namespace
+          $ref: '#/components/responses/Namespace'
         'default':
           $ref: '#/components/responses/Errors'
     put:
@@ -48,9 +54,11 @@ paths:
       operationId: updateNamespace
       tags:
         - Namespaces
+      requestBody:
+        $ref: '#/components/requestBodies/Namespace'
       responses:
         '200':
-          description: Namespace updated successfully
+          $ref: '#/components/responses/Namespace'
         'default':
           $ref: '#/components/responses/Errors'
     delete:
@@ -60,7 +68,7 @@ paths:
         - Namespaces
       responses:
         '204':
-          description: Namespace deleted successfully
+          description: 'Namespace deletion was successful'
         'default':
           $ref: '#/components/responses/Errors'
 
@@ -303,6 +311,39 @@ components:
         - detail
         - status
 
+    Namespace:
+      title: 'Namespace'
+      description: 'An Ansible content Namespace'
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/NamespaceName'
+      required:
+       - name
+
+    NamespaceName:
+      title: 'NamespaceName'
+      description: 'Namespace name. Must be lower case containing only alphanumeric characters and underscores'
+      type: string
+      maxLength: 64
+      example: 'my_namespace'
+      pattern: '^(?!.*__)[a-z]+[0-9a-z_]*$'
+
+    NamespacesPage:
+      description: "Paginated list of Namespaces"
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            data:
+              description: 'List of Namespaces for this page'
+              title: 'Namespaces'
+              type: array
+              items:
+                $ref: '#/components/schemas/Namespace'
+          required:
+            - data
+
     PageInfo:
       description: 'Pagination info'
       title: 'Page Info'
@@ -358,6 +399,11 @@ components:
       required:
         - count
 
+    User:
+      title: 'User'
+      description: 'Automation Hub User'
+      type: object
+
   parameters:
     PageLimit:
       description: 'Number of results to return per page.'
@@ -380,10 +426,36 @@ components:
         default: 0
         minimum: 0
 
+
+    NamespaceName:
+      description: 'Namespace name'
+      in: path
+      name: name
+      required: true
+      schema:
+        type: string
+
+  requestBodies:
+
+    Namespace:
+      description: "A Namespace body"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Namespace'
+
   responses:
+
     Errors:
       description: 'Errors'
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+
+    Namespace:
+      description: 'Response with a Namespace'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Namespace'
