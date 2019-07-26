@@ -103,7 +103,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
         'galaxy_api.auth.auth.RHEntitlementRequired',
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'galaxy_api.api.pagination.LimitOffsetPagination',
 }
 
 RH_ENTITLEMENT_REQUIRED = 'insights'
