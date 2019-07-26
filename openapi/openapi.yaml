@@ -39,6 +39,13 @@ paths:
           $ref: '#/components/responses/Errors'
 
   '/namespaces/{name}/':
+    parameters:
+      - description: 'Namespace name'
+        in: path
+        name: name
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceName'
     get:
       summary: Get Namespace
       operationId: getNamespace
@@ -79,11 +86,14 @@ paths:
     get:
       summary: List Collections
       operationId: listCollections
+      parameters:
+        - $ref: '#/components/parameters/PageOffset'
+        - $ref: '#/components/parameters/PageLimit'
       tags:
         - Collections
       responses:
         '200':
-          description: A paginated list of collections
+          $ref: '#/components/responses/CollectionList'
         'default':
           $ref: '#/components/responses/Errors'
     post:
@@ -91,8 +101,22 @@ paths:
       operationId: uploadCollection
       tags:
         - Collections
+      requestBody:
+        $ref: '#/components/requestBodies/CollectionVersionArtifactBody'
+      responses:
+        '202':
+          $ref: '#/components/responses/CollectionImportAccepted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
+          $ref: '#/components/responses/Errors'
 
   '/collections/{namespace}/{name}/':
+    parameters:
+      - $ref: '#/components/parameters/CollectionNamespaceName'
+      - $ref: '#/components/parameters/CollectionName'
     get:
       summary: Get Collection
       operationId: getCollection
@@ -100,49 +124,73 @@ paths:
         - Collections
       responses:
         '200':
-          description: The requested Collection
+          $ref: '#/components/responses/Collection'
         'default':
-          $ref: '#/components/responses/Errors'
-
+            $ref: '#/components/responses/Errors'
     put:
       summary: Update Collection
       operationId: updateCollection
       tags:
         - Collections
+      parameters: []
+      requestBody:
+        $ref: '#/components/requestBodies/Collection'
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionUpdateAccepted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        'default':
+            $ref: '#/components/responses/Errors'
 
   '/collections/{namespace}/{name}/versions/':
+    parameters:
+      - $ref: '#/components/parameters/CollectionNamespaceName'
+      - $ref: '#/components/parameters/CollectionName'
     get:
       summary: List Collection Versions
       operationId: listCollectionVersions
       tags:
         - Collections
+      parameters:
+        - $ref: '#/components/parameters/PageOffset'
+        - $ref: '#/components/parameters/PageLimit'
       responses:
         '200':
-          description: A paginated list of Collection Versions
+          $ref: '#/components/responses/CollectionVersionList'
         'default':
           $ref: '#/components/responses/Errors'
 
   '/collections/{namespace}/{name}/versions/{version}/':
+    parameters:
+      - $ref: '#/components/parameters/CollectionNamespaceName'
+      - $ref: '#/components/parameters/CollectionName'
+      - $ref: '#/components/parameters/SemanticVersion'
     get:
       summary: Get Collection Version
       operationId: getCollectionVersions
       tags:
         - Collections
+      parameters: []
       responses:
         '200':
-          description: The requested Collection Version
+          $ref: '#/components/responses/CollectionVersion'
         'default':
           $ref: '#/components/responses/Errors'
 
   '/collections/{namespace}/{name}/versions/{version}/artifact/':
+    parameters:
+      - $ref: '#/components/parameters/CollectionNamespaceName'
+      - $ref: '#/components/parameters/CollectionName'
+      - $ref: '#/components/parameters/SemanticVersion'
     get:
-      summary: Get Collection Version
+      summary: Get Collection Version Artifact
       operationId: getCollectionVersionArtifact
       tags:
         - Collections
       responses:
         '200':
-          description: The requested Collection Version Artifact
+          $ref: '#/components/responses/CollectionVersionArtifact'
         'default':
           $ref: '#/components/responses/Errors'
 
@@ -182,6 +230,13 @@ paths:
       operationId: downloadCollection
       tags:
         - Downloads
+      parameters:
+        - $ref: '#/components/parameters/CollectionVersionArtifactFilename'
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionVersionArtifactDownload'
+        'default':
+          $ref: '#/components/responses/Errors'
 
 # -------------------------------------
 # Search
@@ -257,6 +312,93 @@ paths:
 
 components:
   schemas:
+
+    Collection:
+      title: 'Collection'
+      description: 'Ansible content collection'
+      type: object
+      properties:
+        name:
+          description: 'Collection name. Must be lower case containing
+                        only alphanumeric characters and underscores.'
+          type: string
+          maxLength: 64
+          readOnly: true
+        namespace:
+          $ref: '#/components/schemas/Namespace'
+      required:
+        - name
+        - remote_id
+        - namespace
+
+    CollectionCreationResult:
+      title: 'CollectionCreationResult'
+      description: 'A map of collection import task info, including its url'
+      type: object
+      properties:
+        task:
+          description: >
+            The url for the queued collection import task.
+            Check it for progress and status.
+          type: string
+          format: uri
+
+    CollectionsPage:
+      description: 'A page of a list of Collections'
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            data:
+              description: 'List of Collections for this Page'
+              title: 'Collections'
+              type: array
+              items:
+                $ref: '#/components/schemas/Collection'
+          required:
+            - data
+
+    CollectionVersion:
+      description: 'Collection Version'
+      title: 'Collection Version'
+      type: object
+      # TODO: unknown schema yet
+
+    CollectionVersionArtifact:
+      description: 'Collection Version Artifact Details'
+      title: 'Collection Version Artifact'
+      type: object
+      # TODO: unknown schema yet
+
+    CollectionVersionArtifactData:
+      description: >
+        CollectionVersionArtifact archive file binary and sha256 checksum.
+        Used for importing collection artifacts
+      type: object
+      properties:
+        sha256:
+          description: 'The sha256sum of the collection artifact file'
+          type: string
+        file:
+          description: 'The binary contents of a collection artifact'
+          type: string
+          format: binary
+
+    CollectionVersionsPage:
+      description: 'A page of a list of CollectionVersions'
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            data:
+              description: 'List of CollectionVersions for this Page'
+              title: 'CollectionVersions'
+              type: array
+              items:
+                $ref: '#/components/schemas/CollectionVersion'
+          required:
+            - data
+
     Errors:
       title: 'Errors'
       description: "A list of JSON API Error objects"
@@ -288,7 +430,9 @@ components:
           example: 'not_found'
         detail:
           type: string
-          description: 'A human-readable explanation specific to this occurrence of the problem'
+          description: >
+            A human-readable explanation specific to this
+            occurrence of the problem
           example: 'Record /unicorn/11 was not found'
         title:
           type: string
@@ -302,10 +446,14 @@ components:
           type: object
           properties:
             parameter:
-              description: 'A string indicating which URI query parameter caused the error.'
+              description: >
+                A string indicating which URI query parameter
+                caused the error.
               type: string
             pointer:
-              description: 'A JSON Pointer [RFC6901] to the associated entity in the request document '
+              description: >
+                A JSON Pointer [RFC6901] to the associated entity
+                in the request document
               type: string
       required:
         - detail
@@ -323,7 +471,9 @@ components:
 
     NamespaceName:
       title: 'NamespaceName'
-      description: 'Namespace name. Must be lower case containing only alphanumeric characters and underscores'
+      description: >
+          Namespace name. Must be lower case containing
+          only alphanumeric characters and underscores.
       type: string
       maxLength: 64
       example: 'my_namespace'
@@ -399,12 +549,45 @@ components:
       required:
         - count
 
+    SemanticVersion:
+      description: 'A version string in the Semantic Version form'
+      type: string
+      pattern: ^((([0-9]+)\.([0-9]+)\.([0-9]+)(?:-([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?)$
+      example: '1.0.1'
+
     User:
       title: 'User'
       description: 'Automation Hub User'
       type: object
 
   parameters:
+
+    CollectionNamespaceName:
+      description: 'The collection namespace name'
+      in: path
+      name: namespace
+      required: true
+      schema:
+        $ref: '#/components/schemas/NamespaceName'
+
+    CollectionName:
+      description: 'The collection name'
+      in: path
+      name: name
+      required: true
+      schema:
+        type: string
+        pattern: ^(?!.*__)[a-z]+[0-9a-z_]*$'
+
+    CollectionVersionArtifactFilename:
+      description: 'CollectionVersion artifact filename'
+      in: path
+      name: filename
+      required: true
+      schema:
+        type: string
+      example: 'testing.nginx-1.2.3.tar.gz'
+
     PageLimit:
       description: 'Number of results to return per page.'
       in: query
@@ -426,16 +609,30 @@ components:
         default: 0
         minimum: 0
 
-
-    NamespaceName:
-      description: 'Namespace name'
+    SemanticVersion:
+      description: 'A Semantic Version string'
       in: path
-      name: name
+      name: version
       required: true
       schema:
-        type: string
+        $ref: '#/components/schemas/SemanticVersion'
 
   requestBodies:
+    Collection:
+      description: 'A Collection body'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Collection'
+
+    CollectionVersionArtifactBody:
+      description: >
+        A multipart/form encoded payload including the binary
+        collection artifact file contents and it's sha256sum
+      content:
+        multipart/form-data:
+          schema:
+            $ref: '#/components/schemas/CollectionVersionArtifactData'
 
     Namespace:
       description: "A Namespace body"
@@ -445,6 +642,74 @@ components:
             $ref: '#/components/schemas/Namespace'
 
   responses:
+
+    Collection:
+      description: 'Response containing a Collection'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Collection'
+
+    CollectionList:
+      description: 'Response containing a page of Collections'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionsPage'
+
+    CollectionVersion:
+      description: 'Response contain a CollectionVersion'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionVersion'
+
+    CollectionVersionList:
+      description: 'Response containing a page of CollectionVersions'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionVersionsPage'
+
+    CollectionVersionArtifact:
+      description: 'Response containing a CollectionVersionArtifact'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionVersionArtifact'
+
+    CollectionVersionArtifactDownload:
+      description: 'The collection artifact file binary contents'
+      content:
+        application/octet-stream:
+          schema:
+            title: 'CollectionVersionArtifactDownload'
+            description: 'The collection artifact file binary contents'
+            type: string
+            format: binary
+
+    CollectionImportAccepted:
+      description: >
+        Result of an accepted collection import.
+        Includes the url of the import task
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionCreationResult'
+
+    CollectionUpdateAccepted:
+      description: 'Result of an accepted collection update.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Collection'
+
+    Conflict:
+      description: 'Conflict Error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
 
     Errors:
       description: 'Errors'
@@ -459,3 +724,21 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Namespace'
+
+    NotFound:
+      description: 'Not Found (404)'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
+
+    Unauthorized:
+      description: 'Unauthorized (401)'
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Errors'
