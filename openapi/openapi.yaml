@@ -5,6 +5,77 @@ info:
   title: Galaxy API
   license:
     name: Apache-2.0
+  description: |
+    # Introduction
+
+    This is the <a href="https://www.openapis.org">OpenAPI</a> specification 
+    for the **Red Hat Ansible Automation Hub** API.
+
+    ## OpenAPI Information
+    <a target="_top" href="https://swagger.io/docs/specification/about/">Swagger.io OpenAPI documentation</a>
+
+    <a target="_top" href="https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md">OpenAPI Specification</a>
+
+    <a target="_top" href="https://github.com/ansible/galaxy-api/blob/master/openapi/openapi.yaml">Download the Automation Hub OpenAPI Specification</a>.
+
+
+    # API Conventions
+    ## Pagination
+
+    Resource lists are always paginated.
+
+    This pagination format is based on the
+    <a href="https://jsonapi.org/format/#document-structure">JSON API document
+    structure.</a>
+
+     The response will look similar to this:
+
+    ```json
+
+    {
+      "meta": {
+        "count": 5
+      },
+      "links": {
+        "first": "/namespaces/?offset=0&limit=1",
+        "last": "/namespaces/?offset=7&limit=1",
+        "next": "/namespaces/?offset=5&limit=1",
+        "previous": "/namespaces/?offset=3&limit=1"
+      },
+      "data": [
+        {
+          "name": "my_namespace"
+        }
+      ]
+    }
+    ```
+
+    ## Errors
+
+    Error responses always have a top level object with an 'errors' field.
+
+    The value of the 'errors' field is a list of Error objects.
+
+    Example `Errors` response for a 404 on `GET /unicorn/11`
+
+    ```json
+      {
+       "errors": [
+        {
+          "code": "not_found",
+          "detail": "Record /unicorn/11 was not found",
+          "title": "Record not found.",
+          "status": "404",
+          "source": {
+            "parameter": "string",
+            "pointer": "string"
+            }
+          }
+      ]
+    }
+    ```
+
+
 
 paths:
 
