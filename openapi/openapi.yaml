@@ -205,7 +205,7 @@ paths:
         - Imports
       responses:
         '200':
-          description: A paginated list of Collection Imports
+          $ref: '#/components/responses/CollectionImportList'
         'default':
           $ref: '#/components/responses/Errors'
 
@@ -213,11 +213,13 @@ paths:
     get:
       summary: Get Collection Import
       operationId: getCollectionImport
+      parameters:
+        - $ref: '#/components/parameters/CollectionImportId'
       tags:
         - Imports
       responses:
         '200':
-          description: The requested Collection Import
+          $ref: '#/components/responses/CollectionImport'
         'default':
           $ref: '#/components/responses/Errors'
 
@@ -396,6 +398,28 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/CollectionVersion'
+          required:
+            - data
+
+
+    CollectionImport:
+      description: 'Collection import'
+      title: 'CollectionImport'
+      type: object
+      # TODO: unknown schema yet
+
+    CollectionImportsPage:
+      description: 'A page of a list of CollectionImports'
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            data:
+              description: 'List of CollectionImports for this Page'
+              title: 'CollectionImports'
+              type: array
+              items:
+                $ref: '#/components/schemas/CollectionImport'
           required:
             - data
 
@@ -588,6 +612,13 @@ components:
         type: string
       example: 'testing.nginx-1.2.3.tar.gz'
 
+    CollectionImportId:
+      description: 'A unique integer value identifying a collection import.'
+      in: path
+      name: id
+      required: true
+      schema:
+        type: string
     PageLimit:
       description: 'Number of results to return per page.'
       in: query
@@ -711,6 +742,19 @@ components:
           schema:
             $ref: '#/components/schemas/Errors'
 
+    CollectionImport:
+      description: The requested Collection Import
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionImport'
+
+    CollectionImportList:
+      description: Collection Imports
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CollectionImportsPage'
     Errors:
       description: 'Errors'
       content:
