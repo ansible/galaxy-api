@@ -8,7 +8,7 @@ info:
   description: |
     # Introduction
 
-    This is the <a href="https://www.openapis.org">OpenAPI</a> specification 
+    This is the <a href="https://www.openapis.org">OpenAPI</a> specification
     for the **Red Hat Ansible Automation Hub** API.
 
     ## OpenAPI Information
@@ -78,77 +78,6 @@ info:
 
 
 paths:
-
-# -------------------------------------
-# Namespaces
-# -------------------------------------
-  '/namespaces/':
-    get:
-      summary: List namespaces
-      operationId: listNamespaces
-      tags:
-        - Namespaces
-      responses:
-        '200':
-          description: 'Paginated list of Namespaces'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NamespacesPage'
-        'default':
-          $ref: '#/components/responses/Errors'
-    post:
-      summary: Create a namespace
-      tags:
-        - Namespaces
-      requestBody:
-        $ref: '#/components/requestBodies/Namespace'
-      responses:
-        '201':
-          $ref: '#/components/responses/Namespace'
-        'default':
-          $ref: '#/components/responses/Errors'
-
-  '/namespaces/{name}/':
-    parameters:
-      - description: 'Namespace name'
-        in: path
-        name: name
-        required: true
-        schema:
-          $ref: '#/components/schemas/NamespaceName'
-    get:
-      summary: Get Namespace
-      operationId: getNamespace
-      tags:
-        - Namespaces
-      responses:
-        '200':
-          $ref: '#/components/responses/Namespace'
-        'default':
-          $ref: '#/components/responses/Errors'
-    put:
-      summary: Update Namespace
-      operationId: updateNamespace
-      tags:
-        - Namespaces
-      requestBody:
-        $ref: '#/components/requestBodies/Namespace'
-      responses:
-        '200':
-          $ref: '#/components/responses/Namespace'
-        'default':
-          $ref: '#/components/responses/Errors'
-    delete:
-      summary: Delete Namespace
-      operationId: deleteNamespace
-      tags:
-        - Namespaces
-      responses:
-        '204':
-          description: 'Namespace deletion was successful'
-        'default':
-          $ref: '#/components/responses/Errors'
 
 # -------------------------------------
 # Collections
@@ -337,6 +266,78 @@ paths:
           description: A paginated list of Tags
         'default':
           $ref: '#/components/responses/Errors'
+
+# -------------------------------------
+# Namespaces
+# -------------------------------------
+  '/_ui/namespaces/':
+    get:
+      summary: List namespaces
+      operationId: listNamespaces
+      tags:
+        - Namespaces
+      responses:
+        '200':
+          description: 'Paginated list of Namespaces'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NamespacesPage'
+        'default':
+          $ref: '#/components/responses/Errors'
+    post:
+      summary: Create a namespace
+      tags:
+        - Namespaces
+      requestBody:
+        $ref: '#/components/requestBodies/Namespace'
+      responses:
+        '201':
+          $ref: '#/components/responses/Namespace'
+        'default':
+          $ref: '#/components/responses/Errors'
+
+  '/_ui/namespaces/{name}/':
+    parameters:
+      - description: 'Namespace name'
+        in: path
+        name: name
+        required: true
+        schema:
+          $ref: '#/components/schemas/NamespaceName'
+    get:
+      summary: Get Namespace
+      operationId: getNamespace
+      tags:
+        - Namespaces
+      responses:
+        '200':
+          $ref: '#/components/responses/Namespace'
+        'default':
+          $ref: '#/components/responses/Errors'
+    put:
+      summary: Update Namespace
+      operationId: updateNamespace
+      tags:
+        - Namespaces
+      requestBody:
+        $ref: '#/components/requestBodies/Namespace'
+      responses:
+        '200':
+          $ref: '#/components/responses/Namespace'
+        'default':
+          $ref: '#/components/responses/Errors'
+    delete:
+      summary: Delete Namespace
+      operationId: deleteNamespace
+      tags:
+        - Namespaces
+      responses:
+        '204':
+          description: 'Namespace deletion was successful'
+        'default':
+          $ref: '#/components/responses/Errors'
+
 
 # -------------------------------------
 # Users
