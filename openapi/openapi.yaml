@@ -489,9 +489,49 @@ components:
       type: object
       properties:
         name:
+          readOnly: true
           $ref: '#/components/schemas/NamespaceName'
+        company:
+          description: Namespace owner company name
+          type: string
+          maxLength: 64
+        email:
+          description: Namespace contact email
+          type: string
+          format: email
+          maxLength: 256
+        avatar_url:
+          description: Namespace logo URL
+          type: string
+          format: uri
+          maxLength: 256
+        description:
+          description: Namespace brief description
+          type: string
+          maxLength: 256
+        links:
+          description: Related links
+          type: array
+          items:
+            $ref: '#/components/schemas/NamespaceLink'
+
+    NamespaceLink:
+      title: Namespace Link
+      type: object
+      description: Namespace URL links
+      properties:
+        name:
+          type: string
+          maxLength: 32
+          example: Homepage
+        url:
+          type: string
+          format: uri
+          maxLength: 256
+          example: http://example.com
       required:
-       - name
+        - name
+        - url
 
     NamespaceName:
       title: 'NamespaceName'
