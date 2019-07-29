@@ -349,7 +349,7 @@ paths:
         - Users
       responses:
         '200':
-          description: A paginated list of Users
+          $ref: '#/components/responses/UserList'
         'default':
           $ref: '#/components/responses/Errors'
 
@@ -360,9 +360,16 @@ paths:
       operationId: getUser
       tags:
         - Users
+      parameters:
+        - description: 'Username'
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: The requested User
+          $ref: '#/components/responses/User'
         'default':
           $ref: '#/components/responses/Errors'
 
@@ -379,7 +386,7 @@ paths:
         - Profile
       responses:
         '200':
-          description: The current User
+          $ref: '#/components/responses/User'
         'default':
           $ref: '#/components/responses/Errors'
 
@@ -695,6 +702,22 @@ components:
       description: 'Automation Hub User'
       type: object
 
+    UsersPage:
+      description: "Paginated list of Users"
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            data:
+              description: 'List of Users for this Page'
+              title: 'Users'
+              type: array
+              items:
+                $ref: '#/components/schemas/User'
+          required:
+            - data
+
+
   parameters:
 
     CollectionNamespaceName:
@@ -887,6 +910,13 @@ components:
           schema:
             $ref: '#/components/schemas/Errors'
 
+    Profile:
+      description: 'Response with the current User'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+
     Unauthorized:
       description: 'Unauthorized (401)'
       headers:
@@ -897,3 +927,17 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
+
+    User:
+      description: 'Response with an User'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+
+    UserList:
+      description: 'Paginated list of Users'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UsersPage'
