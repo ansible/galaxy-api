@@ -2,8 +2,10 @@
 
 from django.urls import include, path
 
+from .v3 import urls as urls_v3
+
 
 app_name = 'api'
 urlpatterns = [
-    path('v1/', include('galaxy_api.api.v1.urls', namespace='v1')),
+    path('v3/', include(urls_v3, namespace='v3')),
 ]

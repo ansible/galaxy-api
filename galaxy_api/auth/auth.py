@@ -3,7 +3,6 @@ import json
 
 from django.conf import settings
 from django.db import transaction
-from django.db.utils import IntegrityError
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import BasePermission

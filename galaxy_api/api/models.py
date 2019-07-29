@@ -36,6 +36,9 @@ class Namespace(models.Model):
     # References
     owners = models.ManyToManyField(auth_models.Tenant, related_name="namespaces")
 
+    def __str__(self):
+        return self.name
+
     def update_links(self, links):
         """Replace namespace related links with new ones."""
         db_links = [
@@ -67,3 +70,6 @@ class NamespaceLink(models.Model):
     namespace = models.ForeignKey(
         Namespace, on_delete=models.CASCADE, related_name="links"
     )
+
+    def __str__(self):
+        return self.name
