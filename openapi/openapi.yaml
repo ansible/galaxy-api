@@ -381,6 +381,17 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
+  '/_ui/tags/':
+    get:
+      summary: 'List Tags'
+      operationId: listTags
+      tags:
+        - Tags
+      responses:
+        '200':
+          $ref: '#/components/responses/TagList'
+        'default':
+          $ref: '#/components/responses/Errors'
 
 # -------------------------------------
 # Users
@@ -942,12 +953,51 @@ components:
       type: string
       # TODO: This could in theory be an enum
 
+    Tag:
+      description: 'Tag'
+      title: 'Tag'
+      type: object
+      properties:
+        name:
+          maxLength: 32
+          type: string
+        id:
+          description: 'Database ID for this object.'
+          readOnly: true
+          type: integer
+        modified:
+          description: 'Timestamp when this object was last modified.'
+          readOnly: true
+          type: string
+        created:
+          description: 'Timestamp when this object was created.'
+          readOnly: true
+          type: string
+      required:
+        - id
+        - name
+
     TagName:
       description: 'A Tag'
       type: string
       pattern: '^[a-z0-9]+$'
       maxLength: 512
       example: 'development'
+
+    TagsPage:
+      description: "Paginated list of Tags"
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            data:
+              description: 'List of Tags for this page'
+              title: 'Tags'
+              type: array
+              items:
+                $ref: '#/components/schemas/Tag'
+          required:
+            - data
 
     User:
       title: 'User'
@@ -1230,6 +1280,13 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/User'
+
+    TagList:
+      description: 'Response containing a page of Tags'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TagsPage'
 
     Unauthorized:
       description: 'Unauthorized (401)'
