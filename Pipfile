@@ -12,6 +12,7 @@ dynaconf = ">=2.0.3,<3.0"
 [dev-packages]
 flake8 = "*"
 pytest = "*"
+pytest-django = "*"
 
 [requires]
 python_version = "3.6"

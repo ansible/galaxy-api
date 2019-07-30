@@ -105,6 +105,7 @@ REST_FRAMEWORK = {
         'galaxy_api.auth.auth.RHEntitlementRequired',
     ],
     'DEFAULT_PAGINATION_CLASS': 'galaxy_api.api.pagination.LimitOffsetPagination',
+    'EXCEPTION_HANDLER': 'galaxy_api.api.exceptions.exception_handler',
 }
 
 RH_ENTITLEMENT_REQUIRED = 'insights'
