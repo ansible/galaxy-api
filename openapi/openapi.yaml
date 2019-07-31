@@ -244,23 +244,6 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-# -------------------------------------
-# Search
-# -------------------------------------
-
-
-  '/search/tags/':
-    get:
-      summary: Search Tags
-      operationId: searchTags
-      tags:
-        - Search
-      responses:
-        '200':
-          description: A paginated list of Tags
-        'default':
-          $ref: '#/components/responses/Errors'
-
   '/_ui/collections/':
     get:
       summary: List Collections (UI)
