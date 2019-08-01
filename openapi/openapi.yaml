@@ -199,35 +199,6 @@ paths:
           $ref: '#/components/responses/Errors'
 
 # -------------------------------------
-# Imports
-# -------------------------------------
-  '/imports/collections/':
-    get:
-      summary: List Collection Imports
-      operationId: listCollectionImports
-      tags:
-        - Imports
-      responses:
-        '200':
-          $ref: '#/components/responses/CollectionImportList'
-        'default':
-          $ref: '#/components/responses/Errors'
-
-  '/imports/collections/{id}/':
-    get:
-      summary: Get Collection Import
-      operationId: getCollectionImport
-      parameters:
-        - $ref: '#/components/parameters/CollectionImportId'
-      tags:
-        - Imports
-      responses:
-        '200':
-          $ref: '#/components/responses/CollectionImport'
-        'default':
-          $ref: '#/components/responses/Errors'
-
-# -------------------------------------
 # Downloads
 # -------------------------------------
   '/downloads/collections/{filename}':
@@ -241,6 +212,24 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/CollectionVersionArtifactDownload'
+        'default':
+          $ref: '#/components/responses/Errors'
+
+# -------------------------------------
+# Imports
+# -------------------------------------
+
+  '/imports/collections/{import_id}/':
+    get:
+      summary: Get Collection Import
+      operationId: getCollectionImport
+      parameters:
+        - $ref: '#/components/parameters/CollectionImportId'
+      tags:
+        - Imports
+      responses:
+        '200':
+          $ref: '#/components/responses/CollectionImport'
         'default':
           $ref: '#/components/responses/Errors'
 
@@ -293,6 +282,39 @@ paths:
         'default':
             $ref: '#/components/responses/Errors'
 
+  '/_ui/imports/collections/':
+    get:
+      summary: List collections (UI)
+      operationId: listUiCollections
+      parameters:
+        - description: 'The collection namespace name'
+          in: query
+          name: namespace
+          required: true
+          schema:
+            $ref: '#/components/schemas/NamespaceName'
+      tags:
+        - Imports
+      responses:
+        '200':
+          $ref: '#/components/responses/UiCollectionImportList'
+        'default':
+          $ref: '#/components/responses/Errors'
+
+  '/_ui/imports/collections/{import_id}':
+    get:
+      summary: Get collection import (UI)
+      operationId: getUiCollectionImport
+      tags:
+        - Imports
+      parameters:
+        - $ref: '#/components/parameters/CollectionImportId'
+      responses:
+        '200':
+          $ref: '#/components/responses/UiCollectionImport'
+        'default':
+          $ref: '#/components/responses/Errors'
+
 # -------------------------------------
 # Namespaces
 # -------------------------------------
@@ -311,6 +333,7 @@ paths:
                 $ref: '#/components/schemas/NamespacesPage'
         'default':
           $ref: '#/components/responses/Errors'
+
     post:
       summary: Create a namespace
       tags:
@@ -487,23 +510,79 @@ components:
 
     CollectionImport:
       description: 'Collection import'
-      title: 'CollectionImport'
-      type: object
-      # TODO: unknown schema yet
-
-    CollectionSummary:
-      title: 'Collection Summary'
-      description: "A link to the collection summary"
+      title: 'Collection Import'
       type: object
       properties:
-        name:
-          $ref: '#/components/schemas/CollectionName'
+        error:
+          $ref: '#/components/schemas/CollectionImportError'
+        finished_at:
+          type: string
+          format: date-time
         id:
           type: integer
-        href:
-          description: 'link to the Collection'
+        imported_version:
           type: string
-          format: uri
+          readOnly: true
+        job_id:
+          type: string
+          format: uuid
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionImportMessage'
+        name:
+          maxLength: 64
+          type: string
+        namespace:
+          type: string
+        started_at:
+          type: string
+          format: date-time
+        state:
+          type: string
+        version:
+          maxLength: 64
+          type: string
+      required:
+        - error
+        - finished_at
+        - id
+        - job_id
+        - messages
+        - name
+        - namespace
+        - started_at
+        - state
+        - version
+
+    CollectionImportError:
+      description: 'Error reported from collection importer'
+      title: Collection Import Error
+      type: object
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+        traceback:
+          type: string
+
+    CollectionImportMessage:
+      description: 'Message from collection importer'
+      title: Collection Import Message
+      type: object
+      properties:
+        level:
+          type: string
+        message:
+          type: string
+        time:
+          type: string
+          format: date-time
+      required:
+        - level
+        - message
+        - time
 
     CollectionImportsPage:
       description: 'A page of a list of CollectionImports'
@@ -520,13 +599,27 @@ components:
           required:
             - data
 
+    CollectionSummary:
+      title: 'Collection Summary'
+      description: "A link to the collection summary"
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/CollectionName'
+        id:
+          type: integer
+        href:
+          description: 'link to the Collection'
+          type: string
+          format: uri
+
+
+
     CollectionName:
       description: 'The name of a Collection'
       type: string
       example: 'my_collection'
       pattern: '^(?!.*__)[a-z]+[0-9a-z_]*$'
-
-
 
     CollectionsPage:
       description: 'A page of a list of Collections'
@@ -982,6 +1075,64 @@ components:
           required:
             - data
 
+    UiCollectionImport:
+      description: 'Detailed info about a collection (UI)'
+      title: 'Collection Import (UI)'
+      type: object
+      # TODO: add the properties
+      properties:
+        id:
+          type: integer
+        href:
+          type: string
+          format: uri
+        type:
+          description: The type of content that was imported
+          type: string
+          example: 'collection'
+          # TODO: could be enum
+        state:
+          type: string
+          # TODO: could be enum
+        started_at:
+          type: string
+          format: date-time
+          example: '2019-07-23T09:33:15.236371-04:00'
+        finished_at:
+          type: string
+          format: date-time
+          example: '2019-07-23T09:33:22.387688-04:00'
+        namespace:
+          $ref: '#/components/schemas/NamespaceSummary'
+        name:
+          $ref: '#/components/schemas/CollectionName'
+        version:
+          $ref: '#/components/schemas/SemanticVersion'
+      required:
+        - id
+        - href
+        - state
+        - name
+        - namespace
+        - version
+        - started_at
+        - finished_at
+
+    UiCollectionImportPage:
+      description: "Paginated list of collection imports (UI)"
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            data:
+              description: 'List of collection imports (ui) for this Page'
+              title: 'Collection Imports'
+              type: array
+              items:
+                $ref: '#/components/schemas/UiCollectionImport'
+          required:
+            - data
+
     User:
       title: 'User'
       description: 'Automation Hub User'
@@ -1034,10 +1185,11 @@ components:
     CollectionImportId:
       description: 'A unique integer value identifying a collection import.'
       in: path
-      name: id
+      name: import_id
       required: true
       schema:
         type: string
+
     PageLimit:
       description: 'Number of results to return per page.'
       in: query
@@ -1270,6 +1422,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/TagsPage'
+
+    UiCollectionImport:
+      description: The requested Collection Import (UI)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UiCollectionImport'
+
+    UiCollectionImportList:
+      description: 'Response containing a page of Collection imports (UI)'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UiCollectionImportPage'
 
     Unauthorized:
       description: 'Unauthorized (401)'
