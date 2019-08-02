@@ -233,6 +233,10 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
+# -------------------------------------
+# UI: Imports
+# -------------------------------------
+
   '/_ui/collections/':
     get:
       summary: List Collections (UI)
@@ -245,7 +249,7 @@ paths:
         - $ref: '#/components/parameters/SearchNamespace'
         - $ref: '#/components/parameters/SearchTag'
       tags:
-        - Collections
+        - 'UI: Collections'
       responses:
         '200':
           $ref: '#/components/responses/CollectionUiList'
@@ -260,7 +264,7 @@ paths:
       summary: Get Collection (UI)
       operationId: getCollectionUi
       tags:
-        - Collections
+        - 'UI: Collections'
       responses:
         '200':
           description: 'A detailed collection object for the ui'
@@ -270,7 +274,7 @@ paths:
       summary: Update Collection (UI)
       operationId: updateCollectionUi
       tags:
-        - Collections
+        - 'UI: Collections'
       parameters: []
       requestBody:
         $ref: '#/components/requestBodies/CollectionUi'
@@ -282,10 +286,14 @@ paths:
         'default':
             $ref: '#/components/responses/Errors'
 
+# -------------------------------------
+# UI: Imports
+# -------------------------------------
+
   '/_ui/imports/collections/':
     get:
       summary: List collections (UI)
-      operationId: listUiCollections
+      operationId: listCollectionsUi
       parameters:
         - description: 'The collection namespace name'
           in: query
@@ -294,7 +302,7 @@ paths:
           schema:
             $ref: '#/components/schemas/NamespaceName'
       tags:
-        - Imports
+        - 'UI: Imports'
       responses:
         '200':
           $ref: '#/components/responses/UiCollectionImportList'
@@ -304,9 +312,9 @@ paths:
   '/_ui/imports/collections/{import_id}':
     get:
       summary: Get collection import (UI)
-      operationId: getUiCollectionImport
+      operationId: getCollectionImportUi
       tags:
-        - Imports
+        - 'UI: Imports'
       parameters:
         - $ref: '#/components/parameters/CollectionImportId'
       responses:
@@ -316,14 +324,14 @@ paths:
           $ref: '#/components/responses/Errors'
 
 # -------------------------------------
-# Namespaces
+# UI: Namespaces
 # -------------------------------------
   '/_ui/namespaces/':
     get:
-      summary: List namespaces
-      operationId: listNamespaces
+      summary: List namespaces (UI)
+      operationId: listNamespacesUi
       tags:
-        - Namespaces
+        - 'UI: Namespaces'
       responses:
         '200':
           description: 'Paginated list of Namespaces'
@@ -335,9 +343,9 @@ paths:
           $ref: '#/components/responses/Errors'
 
     post:
-      summary: Create a namespace
+      summary: Create a namespace (UI)
       tags:
-        - Namespaces
+        - 'UI: Namespaces'
       requestBody:
         $ref: '#/components/requestBodies/Namespace'
       responses:
@@ -355,20 +363,20 @@ paths:
         schema:
           $ref: '#/components/schemas/NamespaceName'
     get:
-      summary: Get Namespace
-      operationId: getNamespace
+      summary: Get Namespace (UI)
+      operationId: getNamespaceUi
       tags:
-        - Namespaces
+        - 'UI: Namespaces'
       responses:
         '200':
           $ref: '#/components/responses/Namespace'
         'default':
           $ref: '#/components/responses/Errors'
     put:
-      summary: Update Namespace
-      operationId: updateNamespace
+      summary: Update Namespace (UI)
+      operationId: updateNamespaceUi
       tags:
-        - Namespaces
+        - 'UI: Namespaces'
       requestBody:
         $ref: '#/components/requestBodies/Namespace'
       responses:
@@ -377,22 +385,26 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
     delete:
-      summary: Delete Namespace
-      operationId: deleteNamespace
+      summary: Delete Namespace (UI)
+      operationId: deleteNamespaceUi
       tags:
-        - Namespaces
+        - 'UI: Namespaces'
       responses:
         '204':
           description: 'Namespace deletion was successful'
         'default':
           $ref: '#/components/responses/Errors'
 
+# -------------------------------------
+# UI: Tags
+# -------------------------------------
+
   '/_ui/tags/':
     get:
-      summary: 'List Tags'
-      operationId: listTags
+      summary: 'List Tags (UI)'
+      operationId: listTagsUi
       tags:
-        - Tags
+        - 'UI: Tags'
       responses:
         '200':
           $ref: '#/components/responses/TagList'
@@ -400,14 +412,14 @@ paths:
           $ref: '#/components/responses/Errors'
 
 # -------------------------------------
-# Users
+# UI: Users
 # -------------------------------------
-  '/users/':
+  '/_ui/users/':
     get:
-      summary: List Users
-      operationId: listUsers
+      summary: List Users (UI)
+      operationId: listUsersUi
       tags:
-        - Users
+        - 'Ui: Users'
       responses:
         '200':
           $ref: '#/components/responses/UserList'
@@ -415,12 +427,12 @@ paths:
           $ref: '#/components/responses/Errors'
 
 
-  '/users/{id}/':
+  '/_ui/users/{id}/':
     get:
-      summary: Get User
-      operationId: getUser
+      summary: Get User (UI)
+      operationId: getUserUi
       tags:
-        - Users
+        - 'UI: Users'
       parameters:
         - description: 'Username'
           in: path
@@ -434,17 +446,16 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-
 # -------------------------------------
-# Profile
+# UI: Profile
 # -------------------------------------
-  '/profile/':
+  '/_ui/profile/':
     get:
-      summary: Get Profile
-      operationId: getProfile
+      summary: Get Profile (UI)
+      operationId: getProfileUi
       description: Returns information about the current User.
       tags:
-        - Profile
+        - 'UI: Profile'
       responses:
         '200':
           $ref: '#/components/responses/User'
