@@ -342,18 +342,6 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-    post:
-      summary: Create a namespace (UI)
-      tags:
-        - 'UI: Namespaces'
-      requestBody:
-        $ref: '#/components/requestBodies/Namespace'
-      responses:
-        '201':
-          $ref: '#/components/responses/Namespace'
-        'default':
-          $ref: '#/components/responses/Errors'
-
   '/_ui/namespaces/{name}/':
     parameters:
       - description: 'Namespace name'
@@ -382,16 +370,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Namespace'
-        'default':
-          $ref: '#/components/responses/Errors'
-    delete:
-      summary: Delete Namespace (UI)
-      operationId: deleteNamespaceUi
-      tags:
-        - 'UI: Namespaces'
-      responses:
-        '204':
-          description: 'Namespace deletion was successful'
         'default':
           $ref: '#/components/responses/Errors'
 
