@@ -100,22 +100,6 @@ paths:
           $ref: '#/components/responses/CollectionList'
         'default':
           $ref: '#/components/responses/Errors'
-    post:
-      summary: Upload Collection
-      operationId: uploadCollection
-      tags:
-        - Collections
-      requestBody:
-        $ref: '#/components/requestBodies/CollectionVersionArtifactBody'
-      responses:
-        '202':
-          $ref: '#/components/responses/CollectionImportAccepted'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '409':
-          $ref: '#/components/responses/Conflict'
-        default:
-          $ref: '#/components/responses/Errors'
 
   '/collections/{namespace}/{name}/':
     parameters:
@@ -182,36 +166,63 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-  '/collections/{namespace}/{name}/versions/{version}/artifact/':
-    parameters:
-      - $ref: '#/components/parameters/CollectionNamespaceName'
-      - $ref: '#/components/parameters/CollectionName'
-      - $ref: '#/components/parameters/SemanticVersion'
-    get:
-      summary: Get Collection Version Artifact
-      operationId: getCollectionVersionArtifact
+# -------------------------------------
+# Artifacts
+# -------------------------------------
+
+  '/artifacts/collections/':
+    post:
+      summary: Upload Collection Artifact
+      operationId: uploadCollectionArtifact
       tags:
-        - Collections
+        - Artifacts
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              description: >
+                A multipart/form encoded payload including the binary
+                collection artifact file contents and it's sha256 checksum.
+              type: object
+              properties:
+                sha256:
+                  description: 'The sha256 digest of the collection artifact file'
+                  type: string
+                file:
+                  description: 'The binary contents of a collection artifact'
+                  type: string
+                  format: binary
+              required:
+                - file
+                - sha256
       responses:
-        '200':
-          $ref: '#/components/responses/CollectionVersionArtifact'
-        'default':
+        '202':
+          $ref: '#/components/responses/CollectionImportAccepted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        default:
           $ref: '#/components/responses/Errors'
 
-# -------------------------------------
-# Downloads
-# -------------------------------------
-  '/downloads/collections/{filename}':
+
+  '/artifacts/collections/{filename}':
     get:
       summary: Download Collection Artifact
-      operationId: downloadCollection
+      operationId: downloadCollectionArtifact
       tags:
-        - Downloads
+        - Artifacts
       parameters:
         - $ref: '#/components/parameters/CollectionVersionArtifactFilename'
       responses:
         '200':
-          $ref: '#/components/responses/CollectionVersionArtifactDownload'
+          description: 'A requested artifact file.'
+          content:
+            application/octet-stream:
+              schema:
+                description: 'The collection artifact file binary contents.'
+                type: string
+                format: binary
         'default':
           $ref: '#/components/responses/Errors'
 
@@ -602,8 +613,6 @@ components:
           type: string
           format: uri
 
-
-
     CollectionName:
       description: 'The name of a Collection'
       type: string
@@ -685,23 +694,6 @@ components:
       required:
         - filename
         - size
-        - sha256
-
-    CollectionVersionArtifactData:
-      description: >
-        CollectionVersionArtifact archive file binary and sha256 checksum.
-        Used for importing collection artifacts
-      type: object
-      properties:
-        sha256:
-          description: 'The sha256sum of the collection artifact file'
-          type: string
-        file:
-          description: 'The binary contents of a collection artifact'
-          type: string
-          format: binary
-      required:
-        - file
         - sha256
 
     CollectionVersionDependencies:
@@ -1266,15 +1258,6 @@ components:
           schema:
             $ref: '#/components/schemas/CollectionUi'
 
-    CollectionVersionArtifactBody:
-      description: >
-        A multipart/form encoded payload including the binary
-        collection artifact file contents and it's sha256sum
-      content:
-        multipart/form-data:
-          schema:
-            $ref: '#/components/schemas/CollectionVersionArtifactData'
-
     Namespace:
       description: "A Namespace body"
       content:
@@ -1325,16 +1308,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CollectionVersionArtifact'
-
-    CollectionVersionArtifactDownload:
-      description: 'The collection artifact file binary contents'
-      content:
-        application/octet-stream:
-          schema:
-            title: 'CollectionVersionArtifactDownload'
-            description: 'The collection artifact file binary contents'
-            type: string
-            format: binary
 
     CollectionImportAccepted:
       description: >
