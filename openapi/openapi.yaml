@@ -885,6 +885,9 @@ components:
           description: Namespace brief description
           type: string
           maxLength: 256
+        resource_page:
+          description: Namespace resource page in Markdown format.
+          type: string
         links:
           description: Related links
           type: array
