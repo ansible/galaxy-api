@@ -16,7 +16,7 @@ settings = LazySettings(
 # Django settings
 # ---------------------------------------------------------
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
