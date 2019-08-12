@@ -599,20 +599,6 @@ components:
           required:
             - data
 
-    CollectionSummary:
-      title: 'Collection Summary'
-      description: "A link to the collection summary"
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/CollectionName'
-        id:
-          type: integer
-        href:
-          description: 'link to the Collection'
-          type: string
-          format: uri
-
     CollectionName:
       description: 'The name of a Collection'
       type: string
@@ -658,65 +644,11 @@ components:
     CollectionVersion:
       type: object
       properties:
-        artifact:
-          $ref: '#/components/schemas/CollectionVersionArtifact'
-        metadata:
-          $ref: '#/components/schemas/CollectionVersionMetadata'
-        hidden:
-          type: boolean
-        download_url:
-          type: string
-          format: uri
-        namespace:
-          $ref: '#/components/schemas/NamespaceSummary'
         id:
           type: integer
         href:
           type: string
           format: uri
-        collection:
-          $ref: '#/components/schemas/CollectionSummary'
-
-    CollectionVersionArtifact:
-      description: 'Collection Version Artifact Details'
-      title: 'Collection Version Artifact'
-      type: object
-      properties:
-        filename:
-          description: The artifacts filename
-          type: string
-        size:
-          description: The artifacts file size in bytes
-          type: integer
-        sha256:
-          description: 'The sha256sum of the collection artifact file'
-          type: string
-      required:
-        - filename
-        - size
-        - sha256
-
-    CollectionVersionDependencies:
-      description: 'A map of collection namespace.name to a semantic version'
-      type: object
-      additionalProperties:
-        $ref: '#/components/schemas/SemanticVersionSpec'
-
-    CollectionVersionLink:
-      title: 'Collection Version Link'
-      type: object
-      properties:
-        href:
-          description: 'The URL to the CollectionVersion'
-          type: string
-        version:
-          $ref: '#/components/schemas/SemanticVersion'
-
-    CollectionVersionMetadata:
-      title: 'Metadata'
-      description: "The Collection Version metadata from collections galaxy.yml or MANIFEST.JSON"
-      type: object
-      properties:
         documentation:
           description: 'Documentation URL'
           type: string
@@ -726,10 +658,6 @@ components:
           description: 'Description of the collection'
           type: string
           nullable: true
-        readme:
-          description: 'Name of file to use for README'
-          type: string
-          format: relative-file-path
         repository:
           description: 'SCM repository for collection'
           type: string
@@ -771,10 +699,55 @@ components:
         homepage:
           type: string
           format: uri
+        download_url:
+          type: string
+          format: uri
+        artifact:
+          type: object
+          properties:
+            filename:
+              description: The artifacts filename
+              type: string
+            size:
+              description: The artifacts file size in bytes
+              type: integer
+            sha256:
+              description: 'The sha256sum of the collection artifact file'
+              type: string
+        collection:
+          type: object
+          properties:
+            id:
+              type: integer
+            href:
+              description: 'link to the Collection'
+              type: string
+              format: uri
+
+
+    CollectionVersionArtifact:
+      description: 'Collection Version Artifact Details'
+      title: 'Collection Version Artifact'
       required:
-        - namespace
-        - name
-        - version
+        - filename
+        - size
+        - sha256
+
+    CollectionVersionDependencies:
+      description: 'A map of collection namespace.name to a semantic version'
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/SemanticVersionSpec'
+
+    CollectionVersionLink:
+      title: 'Collection Version Link'
+      type: object
+      properties:
+        href:
+          description: 'The URL to the CollectionVersion'
+          type: string
+        version:
+          $ref: '#/components/schemas/SemanticVersion'
 
     CollectionVersionsPage:
       description: 'A page of a list of CollectionVersions'
