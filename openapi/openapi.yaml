@@ -320,20 +320,6 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-  '/_ui/imports/collections/{import_id}':
-    get:
-      summary: Get collection import (UI)
-      operationId: getCollectionImportUi
-      tags:
-        - 'UI: Imports'
-      parameters:
-        - $ref: '#/components/parameters/CollectionImportId'
-      responses:
-        '200':
-          $ref: '#/components/responses/UiCollectionImport'
-        'default':
-          $ref: '#/components/responses/Errors'
-
 # -------------------------------------
 # UI: Namespaces
 # -------------------------------------
