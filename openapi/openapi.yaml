@@ -145,7 +145,11 @@ paths:
         - $ref: '#/components/parameters/PageLimit'
       responses:
         '200':
-          $ref: '#/components/responses/CollectionVersionList'
+          description: 'Response containing a page of CollectionVersions'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionVersionsPage'
         'default':
           $ref: '#/components/responses/Errors'
 
@@ -724,6 +728,20 @@ components:
               type: string
               format: uri
 
+    CollectionVersionListItem:
+      type: object
+      properties:
+        version:
+          $ref: '#/components/schemas/SemanticVersion'
+        href:
+          type: string
+          format: uri
+        created_at:
+          description: 'Timestamp when this object was created.'
+          type: string
+        modified_at:
+          description: 'Timestamp when this object was last modified.'
+          type: string
 
     CollectionVersionArtifact:
       description: 'Collection Version Artifact Details'
@@ -760,7 +778,7 @@ components:
               title: 'CollectionVersions'
               type: array
               items:
-                $ref: '#/components/schemas/CollectionVersion'
+                $ref: '#/components/schemas/CollectionVersionListItem'
           required:
             - data
 
@@ -1267,13 +1285,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CollectionVersion'
-
-    CollectionVersionList:
-      description: 'Response containing a page of CollectionVersions'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CollectionVersionsPage'
 
     CollectionVersionArtifact:
       description: 'Response containing a CollectionVersionArtifact'
