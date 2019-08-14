@@ -2,7 +2,7 @@ from rest_framework import mixins
 from rest_framework import viewsets
 
 from galaxy_api.api import models
-from galaxy_api.api.v3 import serializers
+from galaxy_api.api.ui import serializers
 
 
 class NamespaceViewSet(

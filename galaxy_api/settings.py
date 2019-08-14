@@ -124,6 +124,13 @@ RH_ENTITLEMENT_REQUIRED = 'insights'
 
 API_PATH_PREFIX = 'api'
 
+PULP_API_HOST = 'pulp-api'
+PULP_API_PORT = 8000
+PULP_DISTRIBUTION = 'galaxy'
+
+################################################################################
+#                                   FOOTER                                     #
+################################################################################
 # --- BEGIN OF DYNACONF FOOTER ---
 settings.populate_obj(sys.modules[__name__])
 # --- END OF DYNACONF FOOTER ---
