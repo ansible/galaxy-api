@@ -16,14 +16,16 @@ class NamespaceSerializer(ModelSerializer):
 
     class Meta:
         model = models.Namespace
-        fields = ('name', 'company', 'email', 'avatar_url', 'description', 'links')
+        fields = ('id', 'name', 'company', 'email', 'avatar_url', 'description', 'links')
         read_only_fields = ('name', )
 
+    @transaction.atomic
     def update(self, instance, validated_data):
-        links = validated_data.pop('links')
+        links = validated_data.pop('links', None)
 
-        with transaction.atomic():
-            instance = super().update(instance, validated_data)
-            instance.update_links(links)
+        instance = super().update(instance, validated_data)
+
+        if links is not None:
+            instance.set_links(links)
 
         return instance

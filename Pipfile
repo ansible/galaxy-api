@@ -9,6 +9,8 @@ djangorestframework = ">=3.9.4,<4.0"
 psycopg2-binary = ">=2.8.3,<3.0"
 dynaconf = ">=2.0.3,<3.0"
 requests = "*"
+pulpcore-client = "*"
+pulp-ansible-client = "*"
 
 [dev-packages]
 flake8 = "*"
@@ -17,3 +19,6 @@ pytest-django = "*"
 
 [requires]
 python_version = "3.6"
+
+[pipenv]
+allow_prereleases = true
