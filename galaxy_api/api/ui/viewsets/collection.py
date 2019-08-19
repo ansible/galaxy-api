@@ -43,14 +43,14 @@ class CollectionViewSet(viewsets.GenericViewSet):
         api_client = get_pulp_ansible_client()
         api = pulp_ansible.ContentCollectionsApi(api_client)
 
-        namespace = get_object_or_404(models.Namespace, name=namespace)
+        namespace_obj = get_object_or_404(models.Namespace, name=namespace)
 
         response = api.list(namespace=namespace, name=name, is_highest=True)
         if not response.results:
             raise NotFound()
 
         data = serializers.CollectionSerializer(
-            response.results[0], context={'namespace': namespace}
+            response.results[0], context={'namespace': namespace_obj}
         ).data
 
         return Response(data)
@@ -64,11 +64,9 @@ class CollectionViewSet(viewsets.GenericViewSet):
         return namespaces
 
 
-class CollectionVersionViewSet(viewsets.GenericViewSet):
+class CollectionVersionViewSet(viewsets.ViewSet):
     lookup_url_kwarg = 'version'
     lookup_value_regex = r'[0-9A-Za-z.+-]+'
-
-    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
 
     def list(self, request, *args, **kwargs):
         namespace, name = self.kwargs['collection'].split('/')
