@@ -6,7 +6,14 @@ from . import viewsets
 
 router = routers.SimpleRouter()
 router.register('namespaces', viewsets.NamespaceViewSet)
-
+router.register('collections', viewsets.CollectionViewSet, basename='collections')
+router.register(
+    'collections/(?P<collection>{})/versions'.format(
+        viewsets.CollectionViewSet.lookup_value_regex
+    ),
+    viewsets.CollectionVersionViewSet,
+    basename='collection-versions',
+)
 
 app_name = 'api'
 urlpatterns = [

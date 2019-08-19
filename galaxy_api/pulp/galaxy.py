@@ -15,7 +15,10 @@
 
 import urllib.parse as urlparse
 import requests
+from django.conf import settings
+from django.http import HttpResponse
 from requests.structures import CaseInsensitiveDict
+from rest_framework.response import Response
 
 
 class ApiClient:
@@ -88,3 +91,19 @@ class CollectionVersionApi(_BaseApi):
     def read(self, namespace, name, version):
         path_params = {'namespace': namespace, 'name': name, 'version': version}
         return self.api_client.call('GET', self.read_url, path_params=path_params)
+
+
+def make_galaxy_client():
+    return ApiClient(
+        host=settings.PULP_API_HOST,
+        port=settings.PULP_API_PORT,
+        pulp_distro=settings.PULP_DISTRIBUTION
+    )
+
+
+def make_response(response):
+    # If response is JSON, return DRF response
+    if response.content and response.headers['Content-Type'] == 'application/json':
+        return Response(response.json(), status=response.status_code)
+    # Otherwise return raw HttpResponse
+    return HttpResponse(response.content, status=response.status_code)

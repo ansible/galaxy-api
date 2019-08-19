@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8eb93d9276c515f0e4cb81e3a77268e73b81b6ff7adfbe8c757341cc8e7aa67b"
+            "sha256": "b0eaa2c66bcfef45d25a07f23da5fa6bb6c168f1d843683d0f5a25a927988b6c"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -102,12 +102,35 @@
             "index": "pypi",
             "version": "==2.8.3"
         },
+        "pulp-ansible-client": {
+            "hashes": [
+                "sha256:0135960ba9458aba297db68d3f700e69a226f1c47fb4f1a4197f60213657052a",
+                "sha256:f6318e4eb07018e7dd881e7dbfae8c2caaf2731a9934717a554bf9bd5cf45624"
+            ],
+            "index": "pypi",
+            "version": "==0.2.0b3.dev1565792836"
+        },
+        "pulpcore-client": {
+            "hashes": [
+                "sha256:613e232cf73f5be40954646ed008a6b854af4d4ca230c34bc80b6a49747d50d7",
+                "sha256:7db10ec2a6ebf0daa69cb5ce5f4029ecb0a78dfe7c68e3ce8c8f7ebd1fd3d7fd"
+            ],
+            "index": "pypi",
+            "version": "==3.0.0rc5.dev1565800766"
+        },
         "python-box": {
             "hashes": [
                 "sha256:05713399ee6a4477bb32e90c009c95b1c2e548773f2a993e8b446a3bd396bafb",
                 "sha256:48dbb429347c0e5deb55fc71b993a5d54f8110cd39165b9a971cfab83504b34c"
             ],
             "version": "==3.4.2"
+        },
+        "python-dateutil": {
+            "hashes": [
+                "sha256:7e6584c74aeed623791615e26efd690f29817a27c73085b78e4bad02493df2fb",
+                "sha256:c89805f6f4d64db21ed966fda138f8a5ed7a4fdbc1a8ee329ce1b74e3c74da9e"
+            ],
+            "version": "==2.8.0"
         },
         "python-dotenv": {
             "hashes": [
@@ -130,6 +153,13 @@
             ],
             "index": "pypi",
             "version": "==2.22.0"
+        },
+        "six": {
+            "hashes": [
+                "sha256:3350809f0555b11f552448330d0b52d5f24c91a322ea4a15ef22629740f3761c",
+                "sha256:d16a0141ec1a18405cd4ce8b4613101da75da0e9a7aec5bdd4fa804d0e0eba73"
+            ],
+            "version": "==1.12.0"
         },
         "sqlparse": {
             "hashes": [

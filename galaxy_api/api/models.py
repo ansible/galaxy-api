@@ -39,15 +39,14 @@ class Namespace(models.Model):
     def __str__(self):
         return self.name
 
-    def update_links(self, links):
+    @transaction.atomic
+    def set_links(self, links):
         """Replace namespace related links with new ones."""
-        db_links = [
+        self.links.all().delete()
+        self.links.bulk_create(
             NamespaceLink(name=link["name"], url=link["url"], namespace=self)
             for link in links
-        ]
-        with transaction.atomic():
-            self.links.all().delete()
-            self.links.bulk_create(db_links)
+        )
 
 
 class NamespaceLink(models.Model):

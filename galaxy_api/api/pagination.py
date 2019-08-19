@@ -44,15 +44,22 @@ class LimitOffsetPagination(pagination.LimitOffsetPagination):
         return replace_query_param(url, self.offset_query_param, offset)
 
     def get_paginated_response(self, data):
-        return Response({
-            'meta': {
-                'count': self.count,
-            },
-            'links': {
-                'first': self.get_first_link(),
-                'previous': self.get_previous_link(),
-                'next': self.get_next_link(),
-                'last': self.get_last_link(),
-            },
-            'data': data,
-        })
+        """Returns paginated response."""
+        return Response(
+            {
+                "meta": {"count": self.count},
+                "links": {
+                    "first": self.get_first_link(),
+                    "previous": self.get_previous_link(),
+                    "next": self.get_next_link(),
+                    "last": self.get_last_link(),
+                },
+                "data": data,
+            }
+        )
+
+    # Custom methods for working with pulp client
+    def from_request(self, request):
+        self.request = request
+        self.offset = self.get_offset(request)
+        self.limit = self.get_limit(request)
