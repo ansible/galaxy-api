@@ -82,6 +82,7 @@ paths:
 # -------------------------------------
 # Collections
 # -------------------------------------
+
   '/collections/':
     get:
       summary: List Collections
@@ -113,21 +114,6 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/Collection'
-        'default':
-            $ref: '#/components/responses/Errors'
-    put:
-      summary: Update Collection
-      operationId: updateCollection
-      tags:
-        - Collections
-      parameters: []
-      requestBody:
-        $ref: '#/components/requestBodies/Collection'
-      responses:
-        '200':
-          $ref: '#/components/responses/CollectionUpdateAccepted'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
         'default':
             $ref: '#/components/responses/Errors'
 
@@ -249,7 +235,7 @@ paths:
           $ref: '#/components/responses/Errors'
 
 # -------------------------------------
-# UI: Imports
+# UI: Collections
 # -------------------------------------
 
   '/_ui/collections/':
@@ -267,7 +253,11 @@ paths:
         - 'UI: Collections'
       responses:
         '200':
-          $ref: '#/components/responses/CollectionUiList'
+          description: 'Paginated list of collections'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionPageUi'
         'default':
           $ref: '#/components/responses/Errors'
 
@@ -282,22 +272,11 @@ paths:
         - 'UI: Collections'
       responses:
         '200':
-          description: 'A detailed collection object for the ui'
-        'default':
-            $ref: '#/components/responses/Errors'
-    put:
-      summary: Update Collection (UI)
-      operationId: updateCollectionUi
-      tags:
-        - 'UI: Collections'
-      parameters: []
-      requestBody:
-        $ref: '#/components/requestBodies/CollectionUi'
-      responses:
-        '200':
-          $ref: '#/components/responses/CollectionUiUpdateAccepted'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: 'A collection object'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionUi'
         'default':
             $ref: '#/components/responses/Errors'
 
@@ -327,6 +306,7 @@ paths:
 # -------------------------------------
 # UI: Namespaces
 # -------------------------------------
+
   '/_ui/namespaces/':
     get:
       summary: List namespaces (UI)
@@ -393,6 +373,7 @@ paths:
 # -------------------------------------
 # UI: Users
 # -------------------------------------
+
   '/_ui/users/':
     get:
       summary: List Users (UI)
@@ -428,6 +409,7 @@ paths:
 # -------------------------------------
 # UI: Profile
 # -------------------------------------
+
   '/_ui/profile/':
     get:
       summary: Get Profile (UI)
@@ -611,25 +593,37 @@ components:
             - data
 
     CollectionUi:
-      title: 'CollectionUi'
+      title: 'Collection (UI)'
       description: 'Detailed info about a collection used by the ui'
       type: object
-      # TODO: add the properties
+      properties:
+        id:
+          type: string
+        namespace:
+          type: object
+        name:
+          type: string
+        download_count:
+          type: integer
+        latest_version:
+          type: object
 
-    CollectionUisPage:
-      description: 'A page of a list of CollectionUis'
+    CollectionPageUi:
+      description: 'A page of a list of CollectionItems (UI)'
       allOf:
         - $ref: '#/components/schemas/PageInfo'
         - type: object
           properties:
             data:
-              description: 'List of CollectionUi for this page'
-              title: 'CollectionUis'
               type: array
               items:
                 $ref: '#/components/schemas/CollectionUi'
           required:
             - data
+
+# -------------------------------------
+# Schemas: Collection
+# -------------------------------------
 
     CollectionVersion:
       type: object
@@ -768,6 +762,10 @@ components:
           required:
             - data
 
+# -------------------------------------
+# Schemas: Errors
+# -------------------------------------
+
     Errors:
       title: 'Errors'
       description: "A list of JSON API Error objects"
@@ -827,6 +825,10 @@ components:
       required:
         - detail
         - status
+
+# -------------------------------------
+# Schemas: Namespaces
+# -------------------------------------
 
     Namespace:
       title: 'Namespace'
@@ -918,6 +920,10 @@ components:
           description: 'Link to the Namespace'
           type: string
           format: uri
+
+# -------------------------------------
+# Schemas: Pagination
+# -------------------------------------
 
     PageInfo:
       description: 'Pagination info'
@@ -1257,13 +1263,6 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CollectionsPage'
-
-    CollectionUiList:
-      description: 'Response containing a page of CollectionUi'
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/CollectionUisPage'
 
     CollectionVersion:
       description: 'Response contain a CollectionVersion'
