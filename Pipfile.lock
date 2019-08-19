@@ -104,19 +104,19 @@
         },
         "pulp-ansible-client": {
             "hashes": [
-                "sha256:0135960ba9458aba297db68d3f700e69a226f1c47fb4f1a4197f60213657052a",
-                "sha256:f6318e4eb07018e7dd881e7dbfae8c2caaf2731a9934717a554bf9bd5cf45624"
+                "sha256:88771dfd9b55bdd0a1231efa7eb550ec81aa13f4060799c5c6d32076da386f83",
+                "sha256:c4a76e606022ba6a311de7d0f808fb5829da014db2690837bab8cbe7564f0a7f"
             ],
             "index": "pypi",
-            "version": "==0.2.0b3.dev1565792836"
+            "version": "==0.2.0b3.dev1566052206"
         },
         "pulpcore-client": {
             "hashes": [
-                "sha256:613e232cf73f5be40954646ed008a6b854af4d4ca230c34bc80b6a49747d50d7",
-                "sha256:7db10ec2a6ebf0daa69cb5ce5f4029ecb0a78dfe7c68e3ce8c8f7ebd1fd3d7fd"
+                "sha256:2c18952f5e278248a025f6fa5e2894c5ae25da59131147be3332844009c1aee3",
+                "sha256:798dad1c0e8aca1fecf906dae2e8f02ca44900ca1a4500a6388b2e6792c8c457"
             ],
             "index": "pypi",
-            "version": "==3.0.0rc5.dev1565800766"
+            "version": "==3.0.0rc5.dev1566146508"
         },
         "python-box": {
             "hashes": [
@@ -218,6 +218,7 @@
                 "sha256:23d3d873e008a513952355379d93cbcab874c58f4f034ff657c7a87422fa64e8",
                 "sha256:80d2de76188eabfbfcf27e6a37342c2827801e59c4cc14b0371c56fed43820e3"
             ],
+            "markers": "python_version < '3.8'",
             "version": "==0.19"
         },
         "mccabe": {
@@ -278,11 +279,11 @@
         },
         "pytest": {
             "hashes": [
-                "sha256:6ef6d06de77ce2961156013e9dff62f1b2688aa04d0dc244299fe7d67e09370d",
-                "sha256:a736fed91c12681a7b34617c8fcefe39ea04599ca72c608751c31d89579a3f77"
+                "sha256:3805d095f1ea279b9870c3eeae5dddf8a81b10952c8835cd628cf1875b0ef031",
+                "sha256:abc562321c2d190dd63c2faadf70b86b7af21a553b61f0df5f5e1270717dc5a3"
             ],
             "index": "pypi",
-            "version": "==5.0.1"
+            "version": "==5.1.0"
         },
         "pytest-django": {
             "hashes": [
