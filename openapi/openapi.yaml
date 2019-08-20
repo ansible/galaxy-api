@@ -25,24 +25,17 @@ info:
     Resource lists are always paginated.
 
     This pagination format is based on the
-    <a href="https://jsonapi.org/format/#document-structure">JSON API document
-    structure.</a>
+    <a href="https://www.django-rest-framework.org/api-guide/pagination/#pagenumberpagination">Django Rest Framework default pagination</a>
 
-     The response will look similar to this:
+    The response will look similar to this:
 
     ```json
 
     {
-      "meta": {
-        "count": 5
-      },
-      "links": {
-        "first": "/namespaces/?offset=0&limit=1",
-        "last": "/namespaces/?offset=7&limit=1",
-        "next": "/namespaces/?offset=5&limit=1",
-        "previous": "/namespaces/?offset=3&limit=1"
-      },
-      "data": [
+      "count": 5
+      "next": "/namespaces/?page=5&page_size=1",
+      "previous": "/namespaces/?page=3&page_size=1"
+      "results": [
         {
           "name": "my_namespace"
         }
@@ -88,8 +81,8 @@ paths:
       summary: List Collections
       operationId: listCollections
       parameters:
-        - $ref: '#/components/parameters/PageOffset'
-        - $ref: '#/components/parameters/PageLimit'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
         - $ref: '#/components/parameters/SearchKeyword'
         - $ref: '#/components/parameters/SearchName'
         - $ref: '#/components/parameters/SearchNamespace'
@@ -127,8 +120,8 @@ paths:
       tags:
         - Collections
       parameters:
-        - $ref: '#/components/parameters/PageOffset'
-        - $ref: '#/components/parameters/PageLimit'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
       responses:
         '200':
           description: 'Response containing a page of CollectionVersions'
@@ -243,8 +236,8 @@ paths:
       summary: List Collections (UI)
       operationId: listCollectionsUi
       parameters:
-        - $ref: '#/components/parameters/PageOffset'
-        - $ref: '#/components/parameters/PageLimit'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
         - $ref: '#/components/parameters/SearchKeyword'
         - $ref: '#/components/parameters/SearchName'
         - $ref: '#/components/parameters/SearchNamespace'
@@ -562,14 +555,14 @@ components:
         - $ref: '#/components/schemas/PageInfo'
         - type: object
           properties:
-            data:
+            results:
               description: 'List of CollectionImports for this Page'
               title: 'CollectionImports'
               type: array
               items:
                 $ref: '#/components/schemas/CollectionImport'
           required:
-            - data
+            - results
 
     CollectionName:
       description: 'The name of a Collection'
@@ -583,14 +576,14 @@ components:
         - $ref: '#/components/schemas/PageInfo'
         - type: object
           properties:
-            data:
+            results:
               description: 'List of Collections for this Page'
               title: 'Collections'
               type: array
               items:
                 $ref: '#/components/schemas/Collection'
           required:
-            - data
+            - results
 
     CollectionUi:
       title: 'Collection (UI)'
@@ -614,12 +607,12 @@ components:
         - $ref: '#/components/schemas/PageInfo'
         - type: object
           properties:
-            data:
+            results:
               type: array
               items:
                 $ref: '#/components/schemas/CollectionUi'
           required:
-            - data
+            - results
 
 # -------------------------------------
 # Schemas: Collection
@@ -753,14 +746,14 @@ components:
         - $ref: '#/components/schemas/PageInfo'
         - type: object
           properties:
-            data:
+            results:
               description: 'List of CollectionVersions for this Page'
               title: 'CollectionVersions'
               type: array
               items:
                 $ref: '#/components/schemas/CollectionVersionListItem'
           required:
-            - data
+            - results
 
 # -------------------------------------
 # Schemas: Errors
@@ -899,14 +892,14 @@ components:
         - $ref: '#/components/schemas/PageInfo'
         - type: object
           properties:
-            data:
+            results:
               description: 'List of Namespaces for this page'
               title: 'Namespaces'
               type: array
               items:
                 $ref: '#/components/schemas/Namespace'
           required:
-            - data
+            - results
 
     NamespaceSummary:
       type: object
@@ -929,54 +922,22 @@ components:
       description: 'Pagination info'
       title: 'Page Info'
       properties:
-        meta:
-          $ref: '#/components/schemas/PageMeta'
-        links:
-          $ref: '#/components/schemas/PageLinks'
-      required:
-        - meta
-        - links
-
-    PageLinks:
-      type: object
-      title: 'PageLinks'
-      properties:
-        first:
-          type: string
-          description: 'Link to first page'
-          format: uri
-          example: '/namespaces/?offset=0&limit=1'
-        last:
-          type: string
-          description: 'Link to last page'
-          format: uri
-          example: '/namespaces/?offset=7&limit=1'
+        count:
+          description: 'The number of items available'
+          type: integer
+          example: 10
         next:
-          type: string
           description: 'Link to next page'
+          type: string
           format: uri
-          example: '/namespaces/?offset=5&limit=1'
+          example: '/namespaces/?page=5&page_size=2'
           nullable: true
         previous:
           type: string
           description: 'Link to previous page'
           format: uri
-          example: '/namespaces/?offset=3&limit=1'
+          example: '/namespaces/?page=3&page_size=2'
           nullable: true
-      required:
-        - first
-        - last
-        - next
-        - previous
-
-    PageMeta:
-      title: 'PageMeta'
-      type: object
-      properties:
-        count:
-          description: 'The number of items in this Page'
-          type: integer
-          example: 5
       required:
         - count
 
@@ -1033,14 +994,14 @@ components:
         - $ref: '#/components/schemas/PageInfo'
         - type: object
           properties:
-            data:
+            results:
               description: 'List of Tags for this page'
               title: 'Tags'
               type: array
               items:
                 $ref: '#/components/schemas/Tag'
           required:
-            - data
+            - results
 
     UiCollectionImport:
       description: 'Detailed info about a collection (UI)'
@@ -1091,14 +1052,14 @@ components:
         - $ref: '#/components/schemas/PageInfo'
         - type: object
           properties:
-            data:
+            results:
               description: 'List of collection imports (ui) for this Page'
               title: 'Collection Imports'
               type: array
               items:
                 $ref: '#/components/schemas/UiCollectionImport'
           required:
-            - data
+            - results
 
     User:
       title: 'User'
@@ -1111,14 +1072,14 @@ components:
         - $ref: '#/components/schemas/PageInfo'
         - type: object
           properties:
-            data:
+            results:
               description: 'List of Users for this Page'
               title: 'Users'
               type: array
               items:
                 $ref: '#/components/schemas/User'
           required:
-            - data
+            - results
 
 
   parameters:
@@ -1157,26 +1118,26 @@ components:
       schema:
         type: string
 
-    PageLimit:
+    PageSize:
       description: 'Number of results to return per page.'
       in: query
-      name: limit
+      name: page_size
       required: false
       schema:
         type: integer
         default: 10
         minimum: 1
-        maximum: 100
+        maximum: 1000
 
-    PageOffset:
-      description: 'Page offset number within the paginated result set'
+    Page:
+      description: 'Page number within the paginated result set'
       in: query
-      name: offset
+      name: page
       required: false
       schema:
         type: integer
-        default: 0
-        minimum: 0
+        default: 1
+        minimum: 1
 
     Search:
       description: 'Term to search for'
