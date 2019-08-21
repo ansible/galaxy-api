@@ -19,7 +19,10 @@ class CollectionMetadataBaseSerializer(serializers.Serializer):
     description = serializers.CharField()
     authors = serializers.ListField(serializers.CharField())
     license = serializers.ListField(serializers.CharField())
-    tags = serializers.ListField(serializers.CharField())
+    tags = serializers.SerializerMethodField()
+
+    def get_tags(self, obj):
+        return [tag.name for tag in obj.tags]
 
 
 class CollectionMetadataSerializer(CollectionMetadataBaseSerializer):
