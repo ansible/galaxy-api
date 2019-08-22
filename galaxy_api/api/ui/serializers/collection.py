@@ -21,8 +21,8 @@ class CollectionMetadataBaseSerializer(serializers.Serializer):
     license = serializers.ListField(serializers.CharField())
     tags = serializers.SerializerMethodField()
 
-    def get_tags(self, obj):
-        return [tag.name for tag in obj.tags]
+    def get_tags(self, metadata):
+        return [tag['name'] for tag in metadata['tags']]
 
 
 class CollectionMetadataSerializer(CollectionMetadataBaseSerializer):
@@ -40,7 +40,7 @@ class CollectionVersionBaseSerializer(serializers.Serializer):
     namespace = serializers.CharField()
     name = serializers.CharField()
     version = serializers.CharField()
-    created_at = serializers.DateTimeField(source='created')
+    created_at = serializers.DateTimeField(source='_created')
 
 
 class CollectionVersionAndBaseMetadataSerializer(CollectionVersionBaseSerializer):
@@ -61,11 +61,12 @@ class CollectionSerializer(serializers.Serializer):
     latest_version = CollectionVersionAndBaseMetadataSerializer(source='*')
 
     def get_id(self, obj):
-        return f'{obj.namespace}.{obj.name}'
+        return f"{obj['namespace']}.{obj['name']}"
 
     def get_namespace(self, obj):
+        namespace = obj['namespace']
         if 'namespace_dict' in self.context:
-            namespace = self.context['namespace_dict'][obj.namespace]
+            namespace = self.context['namespace_dict'][namespace]
         else:
             namespace = self.context['namespace']
 
