@@ -91,5 +91,22 @@ class CollectionVersionViewSet(viewsets.ViewSet):
         data = serializers.CollectionVersionSerializer(response.results[0]).data
         return Response(data)
 
-    def set_certified(self):
-        pass
+
+class CollectionImportViewSet(viewsets.ViewSet):
+    lookup_url_kwarg = 'id'
+
+    def list(self, request, *args, **kwargs):
+        api_client = pulp.get_client()
+        api = galaxy_pulp.PulpImportsApi(api_client)
+
+        result = api.list(**self.request.query_params)
+
+        return Response(result)
+
+    def retrieve(self, request, *args, **kwargs):
+        api_client = pulp.get_client()
+        api = galaxy_pulp.PulpImportsApi(api_client)
+
+        result = api.get(id=self.kwargs['id'])
+
+        return Response(result)

@@ -14,6 +14,10 @@ router.register(
     viewsets.CollectionVersionViewSet,
     basename='collection-versions',
 )
+router.register(
+    'imports/collections',
+    viewsets.CollectionImportViewSet,
+    basename='collection-imports')
 
 app_name = 'api'
 urlpatterns = [
