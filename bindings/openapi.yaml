@@ -1,0 +1,292 @@
+openapi: "3.0.0"
+info:
+  version: "1.0.0"
+  title: Bindings for Pulp Ansible API
+  license:
+    name: Apache-2.0
+
+paths:
+  # Pulp Collections API
+  "/pulp/api/v3/content/ansible/collections/":
+    get:
+      operationId: "list"
+      tags: ["pulp: collections"]
+      security:
+        - BasicAuth: []
+      parameters:
+        - in: query
+          name: namespace
+          schema:
+            type: string
+        - in: query
+          name: name
+          schema:
+            type: string
+        - in: query
+          name: version
+          schema:
+            type: string
+        - in: query
+          name: is_highest
+          schema:
+            type: boolean
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  next:
+                    type: string
+                    format: uri
+                  previous:
+                    type: string
+                    format: url
+                  results:
+                    type: array
+                    items:
+                      type: object
+
+  "/pulp/api/v3/content/ansible/collections/{id}":
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: "get"
+      tags: ["pulp: collections"]
+      security:
+        - BasicAuth: []
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # Pulp Imports API
+  "/pulp/api/v3/pulp_ansible/imports/":
+    get:
+      operationId: "list"
+      tags: ["pulp: imports"]
+      security:
+        - BasicAuth: []
+      parameters:
+        - in: query
+          name: namespace
+          schema:
+            type: string
+        - in: query
+          name: name
+          schema:
+            type: string
+        - in: query
+          name: version
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: page_size
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+
+  "/pulp/api/v3/pulp_ansible/imports/{id}/":
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: "get"
+      tags: ["pulp: imports"]
+      security:
+        - BasicAuth: []
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # Galaxy API
+  "/{prefix}/v3/collections/":
+    parameters:
+      - in: path
+        name: prefix
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: "list"
+      tags: ["galaxy: collections"]
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+
+  "/{prefix}/v3/collections/{namespace}/{name}/":
+    parameters:
+      - in: path
+        name: prefix
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: namespace
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: name
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: "get"
+      tags: ["galaxy: collections"]
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+
+  "/{prefix}/v3/collections/{namespace}/{name}/versions/":
+    parameters:
+      - in: path
+        name: prefix
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: namespace
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: name
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: "list_versions"
+      tags: ["galaxy: collections"]
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                type: object
+
+  "/{prefix}/v3/collections/{namespace}/{name}/versions/{version}/":
+    parameters:
+      - in: path
+        name: prefix
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: namespace
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: name
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: version
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: "get_version"
+      tags: ["galaxy: collections"]
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+
+  "/{prefix}/artifacts/collections/":
+    parameters:
+      - in: path
+        name: prefix
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: upload
+      tags: ["galaxy: artifacts"]
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                sha256:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+      responses:
+        202:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task:
+                    type: string
+                    format: uri
+
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic

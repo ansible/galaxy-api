@@ -11,48 +11,98 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
+import mimetypes
+
+from django.conf import settings
+import galaxy_pulp
+from rest_framework.response import Response
 from rest_framework import viewsets
 
-from galaxy_api.pulp.galaxy import CollectionApi, CollectionVersionApi
-from galaxy_api.pulp.galaxy import make_galaxy_client, make_response
+from galaxy_api.common import pulp
 
 
 class CollectionViewSet(viewsets.ViewSet):
 
     def list(self, request, *args, **kwargs):
-        api = CollectionApi(make_galaxy_client())
-        response = api.list(params=request.query_params)
-        return make_response(response)
+        api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
+        response = api.list(prefix=settings.API_PATH_PREFIX, **request.query_params.dict())
+        return Response(response)
 
     def retrieve(self, request, *args, **kwargs):
-        api = CollectionApi(make_galaxy_client())
-        response = api.read(self.kwargs['namespace'], self.kwargs['name'])
-        return make_response(response)
+        api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
+        response = api.get(
+            prefix=settings.API_PATH_PREFIX,
+            namespace=self.kwargs['namespace'],
+            name=self.kwargs['name']
+        )
+        return Response(response)
 
 
 class CollectionVersionViewSet(viewsets.ViewSet):
 
     def list(self, request, *args, **kwargs):
-        api = CollectionVersionApi(make_galaxy_client())
-        response = api.list(
+        api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
+        response = api.list_versions(
+            prefix=settings.API_PATH_PREFIX,
             namespace=self.kwargs['namespace'],
             name=self.kwargs['name'],
-            params=request.query_params)
-        return make_response(response)
+            **request.query_params.dict()
+        )
+        return Response(response)
 
     def retrieve(self, request, *args, **kwargs):
-        api = CollectionVersionApi(make_galaxy_client())
-        response = api.read(
+        api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
+        response = api.get_version(
+            prefix=settings.API_PATH_PREFIX,
             namespace=self.kwargs['namespace'],
             name=self.kwargs['name'],
-            version=self.kwargs['version'])
-        return make_response(response)
+            version=self.kwargs['version'],
+        )
+        return Response(response)
 
 
 class CollectionArtifactViewSet(viewsets.ViewSet):
 
     def upload(self, request, *args, **kwargs):
-        pass
+        # TODO: Validate namespace
+        # TODO: Validate namespace permissions
+
+        file = request.data['file']
+        mimetype = (mimetypes.guess_type(file.name)[0] or 'application/octet-stream')
+        post_params = [
+            ('file', (file.name, file.read(), mimetype))
+        ]
+
+        sha256 = request.data.get('sha256')
+        if sha256:
+            post_params.append(('sha256', sha256))
+
+        api = pulp.get_client()
+        url = '{host}/{prefix}{path}'.format(
+            host=api.configuration.host,
+            prefix=settings.API_PATH_PREFIX,
+            path='/v3/artifacts/collections/',
+        )
+        try:
+            response = api.request(
+                'POST',
+                url,
+                headers={'Content-Type': 'multipart/form-data'},
+                post_params=post_params,
+            )
+        except galaxy_pulp.ApiException as exc:
+            status = exc.status
+            data = exc.body
+            headers = exc.headers
+        else:
+            status = response.status
+            data = response.data
+            headers = response.getheaders()
+
+        if headers['Content-Type'] == 'application/json':
+            data = json.loads(data)
+        return Response(data=data, status=status)
 
     def download(self, request, *args, **kwargs):
         pass

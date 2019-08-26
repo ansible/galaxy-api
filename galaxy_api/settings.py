@@ -122,13 +122,12 @@ RH_ENTITLEMENT_REQUIRED = 'insights'
 # Application settings
 # ---------------------------------------------------------
 
-API_PATH_PREFIX = 'api'
+API_PATH_PREFIX = 'api/automation-hub'
 
 PULP_API_HOST = 'pulp-api'
 PULP_API_PORT = 8000
 PULP_API_USER = 'admin'
 PULP_API_PASSWORD = 'admin'
-PULP_DISTRIBUTION = 'galaxy'
 
 ################################################################################
 #                                   FOOTER                                     #
