@@ -106,3 +106,11 @@ class CollectionArtifactViewSet(viewsets.ViewSet):
 
     def download(self, request, *args, **kwargs):
         pass
+
+
+class CollectionImportViewSet(viewsets.ViewSet):
+
+    def retrieve(self, request, pk):
+        api = galaxy_pulp.GalaxyImportsApi(pulp.get_client())
+        response = api.get(prefix=settings.API_PATH_PREFIX, id=pk)
+        return Response(response)

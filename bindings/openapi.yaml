@@ -285,6 +285,29 @@ paths:
                     type: string
                     format: uri
 
+  "/{prefix}/imports/collections/{id}/":
+    parameters:
+      - in: path
+        name: prefix
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: "get"
+      tags: ["galaxy: imports"]
+      responses:
+        202:
+          description: "Accepted"
+          content:
+            application/json:
+              schema:
+                type: object
+
 components:
   securitySchemes:
     BasicAuth:

@@ -106,3 +106,23 @@ class TestCollectionVersionViewSet(BaseTestCase):
         self.collection_api.get_version.assert_called_once_with(
             prefix=API_PREFIX, namespace="ansible", name="nginx", version="1.2.3"
         )
+
+
+class TestCollectionImportViewSet(BaseTestCase):
+    def setUp(self):
+        super().setUp()
+
+        patcher = mock.patch("galaxy_pulp.GalaxyImportsApi")
+        self.imports_api = patcher.start().return_value
+        self.addCleanup(patcher.stop)
+
+    def test_retrieve(self):
+        self.imports_api.get.return_value = {}
+        response = self.client.get(
+            f"/{API_PREFIX}/v3/imports/collections/3e26b82c-702f-4bdd-a568-7d9db17759c1/"
+        )
+
+        assert response.status_code == 200
+        self.imports_api.get.assert_called_once_with(
+            prefix=API_PREFIX, id='3e26b82c-702f-4bdd-a568-7d9db17759c1'
+        )

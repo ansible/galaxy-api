@@ -24,6 +24,10 @@ urlpatterns = [
         viewsets.CollectionVersionViewSet.as_view({'get': 'retrieve'}),
     ),
     path(
+        'imports/collections/<str:pk>/',
+        viewsets.CollectionImportViewSet.as_view({'get': 'retrieve'}),
+    ),
+    path(
         'artifacts/collections/',
         viewsets.CollectionArtifactViewSet.as_view({'post': 'upload'}),
     ),
