@@ -3,16 +3,26 @@ from rest_framework import serializers
 from .namespace import NamespaceSerializer
 
 
-# TODO: Aggregate contents by type (Example data from David needed)
-#   class ContentSummary {
-#       total_count: number;
-#       contents: {
-#           module: string[];
-#           role: string[];
-#           plugin: string[];
-#           playbook: string[];
-#       };
-#   }
+class ContentSummarySerializer(serializers.Serializer):
+
+    def to_representation(self, contents):
+        summary = {"role": [], "module": [], "playbook": [], "plugin": []}
+        for item in contents:
+            key = self._get_content_type_key(item["content_type"])
+            summary[key].append(item['name'])
+        return {"total_count": sum(map(len, summary.items())), "contents": summary}
+
+    @staticmethod
+    def _get_content_type_key(content_type: str) -> str:
+        # FIXME(cutwater): Replace with galaxy-importer constants usage
+        if content_type == "role":  # ContentType.ROLE (from galaxy-importer)
+            return "role"
+        elif content_type == "module":  # ContentType.MODULE (from galaxy-importer)
+            return "module"
+        elif content_type == "playbook":  # ContentType.PLAYBOOK (from galaxy-importer)
+            return "playbook"
+        else:
+            return "plugin"
 
 
 class CollectionMetadataBaseSerializer(serializers.Serializer):
@@ -43,7 +53,7 @@ class CollectionVersionBaseSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(source='_created')
 
 
-class CollectionVersionAndBaseMetadataSerializer(CollectionVersionBaseSerializer):
+class CollectionLatestVersionSerializer(CollectionVersionBaseSerializer):
     metadata = CollectionMetadataBaseSerializer(source='*')
 
 
@@ -58,7 +68,8 @@ class CollectionSerializer(serializers.Serializer):
     name = serializers.CharField()
     download_count = serializers.IntegerField(default=0)
 
-    latest_version = CollectionVersionAndBaseMetadataSerializer(source='*')
+    latest_version = CollectionLatestVersionSerializer(source='*')
+    content_summary = ContentSummarySerializer(source='contents')
 
     def get_id(self, obj):
         return f"{obj['namespace']}.{obj['name']}"
