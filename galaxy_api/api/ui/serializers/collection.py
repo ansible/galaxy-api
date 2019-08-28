@@ -63,16 +63,13 @@ class CollectionVersionSerializer(CollectionMetadataBaseSerializer):
 
 
 class CollectionSerializer(serializers.Serializer):
-    id = serializers.SerializerMethodField()
+    id = serializers.UUIDField()
     namespace = serializers.SerializerMethodField()
     name = serializers.CharField()
     download_count = serializers.IntegerField(default=0)
 
     latest_version = CollectionLatestVersionSerializer(source='*')
     content_summary = ContentSummarySerializer(source='contents')
-
-    def get_id(self, obj):
-        return f"{obj['namespace']}.{obj['name']}"
 
     def get_namespace(self, obj):
         namespace = obj['namespace']
