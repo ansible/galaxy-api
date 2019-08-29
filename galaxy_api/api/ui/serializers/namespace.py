@@ -16,7 +16,16 @@ class NamespaceSerializer(ModelSerializer):
 
     class Meta:
         model = models.Namespace
-        fields = ('id', 'name', 'company', 'email', 'avatar_url', 'description', 'links')
+        fields = (
+            'id',
+            'name',
+            'company',
+            'email',
+            'avatar_url',
+            'description',
+            'links',
+            'resources'
+        )
         read_only_fields = ('name', )
 
     @transaction.atomic
