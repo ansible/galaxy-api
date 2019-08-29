@@ -2,7 +2,6 @@ import galaxy_pulp
 from rest_framework import viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
-from rest_framework.settings import api_settings
 from rest_framework.response import Response
 
 from galaxy_api.api import models
@@ -14,27 +13,25 @@ class CollectionViewSet(viewsets.GenericViewSet):
     lookup_url_kwarg = 'collection'
     lookup_value_regex = r'[0-9a-z_]+/[0-9a-z_]+'
 
-    pagination_class = api_settings.DEFAULT_PAGINATION_CLASS
-
     def list(self, request, *args, **kwargs):
-        self.paginator.from_request(request)
+        self.paginator.init_from_request(request)
 
-        page = (self.paginator.offset // self.paginator.limit) + 1
-        page_size = self.paginator.limit
+        params = self.request.query_params.dict()
+        params.update({
+            'offset': self.paginator.offset,
+            'limit': self.paginator.limit,
+        })
 
         api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
-
-        response = api.list(is_highest=True, page=page, page_size=page_size)
-        self.paginator.count = response.count
+        response = api.list(is_highest=True, **params)
 
         namespaces = set(collection['namespace'] for collection in response.results)
         namespaces = self._query_namespaces(namespaces)
 
-        data = serializers.CollectionSerializer(
-            response.results, many=True, context={'namespace_dict': namespaces}
+        data = serializers.CollectionListSerializer(
+            response.results, many=True, context={'namespaces': namespaces}
         ).data
-
-        return self.paginator.get_paginated_response(data)
+        return self.paginator.paginate_proxy_response(data, response.count)
 
     def retrieve(self, request, *args, **kwargs):
         namespace, name = self.kwargs['collection'].split('/')
@@ -46,7 +43,7 @@ class CollectionViewSet(viewsets.GenericViewSet):
         if not response.results:
             raise NotFound()
 
-        data = serializers.CollectionSerializer(
+        data = serializers.CollectionDetailSerializer(
             response.results[0], context={'namespace': namespace_obj}
         ).data
 
@@ -62,21 +59,28 @@ class CollectionViewSet(viewsets.GenericViewSet):
         return namespaces
 
 
-class CollectionVersionViewSet(viewsets.ViewSet):
+class CollectionVersionViewSet(viewsets.GenericViewSet):
     lookup_url_kwarg = 'version'
     lookup_value_regex = r'[0-9A-Za-z.+-]+'
 
     def list(self, request, *args, **kwargs):
         namespace, name = self.kwargs['collection'].split('/')
 
-        api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
+        self.paginator.init_from_request(request)
 
-        response = api.list(namespace=namespace, name=name)
+        params = self.request.query_params.dict()
+        params.update({
+            'offset': self.paginator.offset,
+            'limit': self.paginator.limit,
+        })
+
+        api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
+        response = api.list(namespace=namespace, name=name, **params)
         if response.count == 0:
             raise NotFound()
 
         data = serializers.CollectionVersionBaseSerializer(response.results, many=True).data
-        return Response(data)
+        return self.paginator.paginate_proxy_response(data, response.count)
 
     def retrieve(self, request, *args, **kwargs):
         namespace, name = self.kwargs['collection'].split('/')
@@ -84,7 +88,7 @@ class CollectionVersionViewSet(viewsets.ViewSet):
 
         api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
 
-        response = api.list(namespace=namespace, name=name, version=version)
+        response = api.list(namespace=namespace, name=name, version=version, limit=1)
         if not response.results:
             raise NotFound()
 
@@ -92,16 +96,24 @@ class CollectionVersionViewSet(viewsets.ViewSet):
         return Response(data)
 
 
-class CollectionImportViewSet(viewsets.ViewSet):
+class CollectionImportViewSet(viewsets.GenericViewSet):
     lookup_url_kwarg = 'id'
 
     def list(self, request, *args, **kwargs):
+        self.paginator.init_from_request(request)
+
+        params = self.request.query_params.dict()
+        params.update({
+            'offset': self.paginator.offset,
+            'limit': self.paginator.limit,
+        })
+
         api_client = pulp.get_client()
         api = galaxy_pulp.PulpImportsApi(api_client)
 
-        result = api.list(**self.request.query_params)
+        response = api.list(**params)
 
-        return Response(result)
+        return self.paginator.paginate_proxy_response(response.results, response.count)
 
     def retrieve(self, request, *args, **kwargs):
         api_client = pulp.get_client()

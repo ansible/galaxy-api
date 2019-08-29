@@ -1,10 +1,11 @@
 import unittest
 from unittest import mock
 
+import galaxy_pulp
 from django.conf import settings
-from galaxy_api.auth.auth import RHEntitlementRequired
 from rest_framework.test import APIClient
 
+from galaxy_api.auth.auth import RHEntitlementRequired
 from galaxy_api.auth.models import User
 
 API_PREFIX = settings.API_PATH_PREFIX.strip("/")
@@ -34,21 +35,27 @@ class TestCollectionViewSet(BaseTestCase):
         self.addCleanup(patcher.stop)
 
     def test_list(self):
-        self.collection_api.list.return_value = {}
+        self.collection_api.list.return_value = galaxy_pulp.ResultsPage(
+            count=1, results=[]
+        )
         response = self.client.get(f"/{API_PREFIX}/v3/collections/")
 
         assert response.status_code == 200
-        self.collection_api.list.assert_called_once_with(prefix=API_PREFIX)
+        self.collection_api.list.assert_called_once_with(
+            prefix=API_PREFIX, offset=0, limit=10
+        )
 
     def test_list_limit_offset(self):
-        self.collection_api.list.return_value = {}
+        self.collection_api.list.return_value = galaxy_pulp.ResultsPage(
+            count=1, results=[]
+        )
         response = self.client.get(
             f"/{API_PREFIX}/v3/collections/", data={"limit": 10, "offset": 20}
         )
 
         assert response.status_code == 200
         self.collection_api.list.assert_called_once_with(
-            prefix=API_PREFIX, limit="10", offset="20"
+            prefix=API_PREFIX, limit=10, offset=20
         )
 
     def test_retrieve(self):
@@ -70,18 +77,22 @@ class TestCollectionVersionViewSet(BaseTestCase):
         self.addCleanup(patcher.stop)
 
     def test_list(self):
-        self.collection_api.list_versions.return_value = {}
+        self.collection_api.list_versions.return_value = galaxy_pulp.ResultsPage(
+            count=1, results=[]
+        )
         response = self.client.get(
             f"/{API_PREFIX}/v3/collections/ansible/nginx/versions/"
         )
 
         assert response.status_code == 200
         self.collection_api.list_versions.assert_called_once_with(
-            prefix=API_PREFIX, namespace="ansible", name="nginx"
+            prefix=API_PREFIX, namespace="ansible", name="nginx", limit=10, offset=0
         )
 
     def test_list_limit_offset(self):
-        self.collection_api.list_versions.return_value = {}
+        self.collection_api.list_versions.return_value = galaxy_pulp.ResultsPage(
+            count=1, results=[]
+        )
         response = self.client.get(
             f"/{API_PREFIX}/v3/collections/ansible/nginx/versions/",
             data={"limit": 10, "offset": 20},
@@ -89,11 +100,7 @@ class TestCollectionVersionViewSet(BaseTestCase):
 
         assert response.status_code == 200
         self.collection_api.list_versions.assert_called_once_with(
-            prefix=API_PREFIX,
-            namespace="ansible",
-            name="nginx",
-            limit="10",
-            offset="20",
+            prefix=API_PREFIX, namespace="ansible", name="nginx", limit=10, offset=20
         )
 
     def test_retrieve(self):
@@ -124,5 +131,5 @@ class TestCollectionImportViewSet(BaseTestCase):
 
         assert response.status_code == 200
         self.imports_api.get.assert_called_once_with(
-            prefix=API_PREFIX, id='3e26b82c-702f-4bdd-a568-7d9db17759c1'
+            prefix=API_PREFIX, id="3e26b82c-702f-4bdd-a568-7d9db17759c1"
         )
