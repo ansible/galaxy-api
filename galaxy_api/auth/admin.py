@@ -6,3 +6,8 @@ from galaxy_api.auth import models
 @admin.register(models.User)
 class UserAdmin(BaseUserAdmin):
     pass
+
+
+@admin.register(models.Tenant)
+class TenantAdmin(admin.ModelAdmin):
+    pass
