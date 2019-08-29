@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("name", models.CharField(editable=False, max_length=64, unique=True)),
+                ("name", models.CharField(max_length=64, unique=True)),
                 ("company", models.CharField(blank=True, max_length=64)),
                 ("email", models.CharField(blank=True, max_length=256)),
                 ("avatar_url", models.CharField(blank=True, max_length=256)),

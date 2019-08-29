@@ -27,7 +27,7 @@ class Namespace(models.Model):
 
     # Fields
 
-    name = models.CharField(max_length=64, unique=True, editable=True)
+    name = models.CharField(max_length=64, unique=True)
     company = models.CharField(max_length=64, blank=True)
     email = models.CharField(max_length=256, blank=True)
     avatar_url = models.CharField(max_length=256, blank=True)
