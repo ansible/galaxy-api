@@ -17,7 +17,9 @@ router.register(
 router.register(
     'imports/collections',
     viewsets.CollectionImportViewSet,
-    basename='collection-imports')
+    basename='collection-imports',
+)
+router.register('tags', viewsets.TagsViewSet, basename='tags')
 
 app_name = 'api'
 urlpatterns = [
