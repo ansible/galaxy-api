@@ -122,6 +122,31 @@ paths:
               schema:
                 type: object
 
+  # Pulp Tags API
+  "/pulp/api/v3/pulp_ansible/tags/":
+    get:
+      operationId: "list"
+      tags: ["pulp: tags"]
+      security:
+        - BasicAuth: []
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResultsPage'
+
+
   # Galaxy API
   "/{prefix}/v3/collections/":
     parameters:
