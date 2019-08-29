@@ -58,8 +58,8 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
             'limit': self.paginator.limit,
         })
 
-        api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
-        response = api.list_versions(
+        api = galaxy_pulp.GalaxyCollectionVersionsApi(pulp.get_client())
+        response = api.list(
             prefix=settings.API_PATH_PREFIX,
             namespace=self.kwargs['namespace'],
             name=self.kwargs['name'],
@@ -68,8 +68,8 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
         return self.paginator.paginate_proxy_response(response.results, response.count)
 
     def retrieve(self, request, *args, **kwargs):
-        api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
-        response = api.get_version(
+        api = galaxy_pulp.GalaxyCollectionVersionsApi(pulp.get_client())
+        response = api.get(
             prefix=settings.API_PATH_PREFIX,
             namespace=self.kwargs['namespace'],
             name=self.kwargs['name'],
