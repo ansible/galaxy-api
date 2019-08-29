@@ -62,7 +62,7 @@ class CollectionVersionSerializer(CollectionMetadataBaseSerializer):
     docs_blob = serializers.JSONField()
 
 
-class CollectionSerializer(serializers.Serializer):
+class _CollectionSerializer(serializers.Serializer):
     id = serializers.UUIDField()
     namespace = serializers.SerializerMethodField()
     name = serializers.CharField()
@@ -71,11 +71,21 @@ class CollectionSerializer(serializers.Serializer):
     latest_version = CollectionLatestVersionSerializer(source='*')
     content_summary = ContentSummarySerializer(source='contents')
 
-    def get_namespace(self, obj):
-        namespace = obj['namespace']
-        if 'namespace_dict' in self.context:
-            namespace = self.context['namespace_dict'][namespace]
-        else:
-            namespace = self.context['namespace']
+    def _get_namespace(self, obj):
+        raise NotImplementedError
 
+    def get_namespace(self, obj):
+        namespace = self._get_namespace(obj)
         return NamespaceSerializer(namespace).data
+
+
+class CollectionListSerializer(_CollectionSerializer):
+    def _get_namespace(self, obj):
+        name = obj['namespace']
+        return self.context['namespaces'][name]
+
+
+class CollectionDetailSerializer(_CollectionSerializer):
+
+    def _get_namespace(self, obj):
+        return self.context['namespace']

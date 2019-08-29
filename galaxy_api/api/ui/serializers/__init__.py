@@ -1,6 +1,7 @@
 from .namespace import NamespaceSerializer
 from .collection import (
-    CollectionSerializer,
+    CollectionDetailSerializer,
+    CollectionListSerializer,
     CollectionVersionSerializer,
     CollectionVersionBaseSerializer,
 )
@@ -8,7 +9,8 @@ from .collection import (
 
 __all__ = (
     'NamespaceSerializer',
-    'CollectionSerializer',
+    'CollectionDetailSerializer',
+    'CollectionListSerializer',
     'CollectionVersionSerializer',
     'CollectionVersionBaseSerializer',
 )

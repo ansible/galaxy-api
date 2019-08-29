@@ -31,11 +31,11 @@ paths:
           schema:
             type: boolean
         - in: query
-          name: page
+          name: offset
           schema:
             type: integer
         - in: query
-          name: page_size
+          name: limit
           schema:
             type: integer
       responses:
@@ -44,20 +44,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  count:
-                    type: integer
-                  next:
-                    type: string
-                    format: uri
-                  previous:
-                    type: string
-                    format: url
-                  results:
-                    type: array
-                    items:
-                      type: object
+                $ref: '#/components/schemas/ResultsPage'
 
   "/pulp/api/v3/content/ansible/collections/{id}":
     parameters:
@@ -100,11 +87,11 @@ paths:
           schema:
             type: string
         - in: query
-          name: page
+          name: offset
           schema:
             type: integer
         - in: query
-          name: page_size
+          name: limit
           schema:
             type: integer
       responses:
@@ -113,7 +100,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/ResultsPage'
 
   "/pulp/api/v3/pulp_ansible/imports/{id}/":
     parameters:
@@ -148,11 +135,11 @@ paths:
       tags: ["galaxy: collections"]
       parameters:
         - in: query
-          name: limit
+          name: offset
           schema:
             type: integer
         - in: query
-          name: offset
+          name: limit
           schema:
             type: integer
       responses:
@@ -161,7 +148,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/ResultsPage'
 
   "/{prefix}/v3/collections/{namespace}/{name}/":
     parameters:
@@ -211,13 +198,22 @@ paths:
     get:
       operationId: "list_versions"
       tags: ["galaxy: collections"]
+      parameters:
+        - in: query
+          name: offset
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
       responses:
         200:
           description: 'OK'
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/ResultsPage'
 
   "/{prefix}/v3/collections/{namespace}/{name}/versions/{version}/":
     parameters:
@@ -313,3 +309,20 @@ components:
     BasicAuth:
       type: http
       scheme: basic
+
+  schemas:
+    ResultsPage:
+      type: object
+      properties:
+        count:
+          type: integer
+        next:
+          type: string
+          format: uri
+        previous:
+          type: string
+          format: url
+        results:
+          type: array
+          items:
+            type: object

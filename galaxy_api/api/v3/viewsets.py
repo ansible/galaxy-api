@@ -22,12 +22,20 @@ from rest_framework import viewsets
 from galaxy_api.common import pulp
 
 
-class CollectionViewSet(viewsets.ViewSet):
+class CollectionViewSet(viewsets.GenericViewSet):
 
     def list(self, request, *args, **kwargs):
+        self.paginator.init_from_request(request)
+
+        params = self.request.query_params.dict()
+        params.update({
+            'offset': self.paginator.offset,
+            'limit': self.paginator.limit,
+        })
+
         api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
-        response = api.list(prefix=settings.API_PATH_PREFIX, **request.query_params.dict())
-        return Response(response)
+        response = api.list(prefix=settings.API_PATH_PREFIX, **params)
+        return self.paginator.paginate_proxy_response(response.results, response.count)
 
     def retrieve(self, request, *args, **kwargs):
         api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
@@ -39,17 +47,25 @@ class CollectionViewSet(viewsets.ViewSet):
         return Response(response)
 
 
-class CollectionVersionViewSet(viewsets.ViewSet):
+class CollectionVersionViewSet(viewsets.GenericViewSet):
 
     def list(self, request, *args, **kwargs):
+        self.paginator.init_from_request(request)
+
+        params = self.request.query_params.dict()
+        params.update({
+            'offset': self.paginator.offset,
+            'limit': self.paginator.limit,
+        })
+
         api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())
         response = api.list_versions(
             prefix=settings.API_PATH_PREFIX,
             namespace=self.kwargs['namespace'],
             name=self.kwargs['name'],
-            **request.query_params.dict()
+            **params,
         )
-        return Response(response)
+        return self.paginator.paginate_proxy_response(response.results, response.count)
 
     def retrieve(self, request, *args, **kwargs):
         api = galaxy_pulp.GalaxyCollectionsApi(pulp.get_client())

@@ -59,7 +59,15 @@ class LimitOffsetPagination(pagination.LimitOffsetPagination):
         )
 
     # Custom methods for working with pulp client
-    def from_request(self, request):
+    def init_from_request(self, request):
         self.request = request
         self.offset = self.get_offset(request)
         self.limit = self.get_limit(request)
+
+    def paginate_proxy_response(self, data, count):
+        self.count = count
+
+        if self.count > self.limit and self.template is not None:
+            self.display_page_controls = True
+
+        return self.get_paginated_response(data)
