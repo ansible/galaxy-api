@@ -1,5 +1,7 @@
 import galaxy_pulp
+from django.conf import settings
 from rest_framework import viewsets
+from rest_framework.decorators import action as drf_action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
@@ -87,13 +89,32 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
         version = self.kwargs['version']
 
         api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
-
         response = api.list(namespace=namespace, name=name, version=version, limit=1)
         if not response.results:
             raise NotFound()
 
         data = serializers.CollectionVersionSerializer(response.results[0]).data
         return Response(data)
+
+    @drf_action(methods=["PUT", "DELETE"], detail=True, url_path="certified")
+    def set_certified(self, request, *args, **kwargs):
+        namespace, name = self.kwargs['collection'].split('/')
+        version = self.kwargs['version']
+
+        api = galaxy_pulp.GalaxyCollectionVersionsApi(pulp.get_client())
+
+        if self.request.method == "PUT":
+            api_method = api.set_certified
+        else:
+            api_method = api.unset_certified
+
+        response = api_method(
+            prefix=settings.API_PATH_PREFIX,
+            namespace=namespace,
+            name=name,
+            version=version,
+        )
+        return Response(response)
 
 
 class CollectionImportViewSet(viewsets.GenericViewSet):

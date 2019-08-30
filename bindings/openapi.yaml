@@ -46,7 +46,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResultsPage'
 
-  "/pulp/api/v3/content/ansible/collections/{id}":
+  "/pulp/api/v3/content/ansible/collections/{id}/":
     parameters:
       - in: path
         name: id
@@ -147,7 +147,7 @@ paths:
                 $ref: '#/components/schemas/ResultsPage'
 
 
-  # Galaxy API
+  # Galaxy Collections API
   "/{prefix}/v3/collections/":
     parameters:
       - in: path
@@ -203,6 +203,7 @@ paths:
               schema:
                 type: object
 
+  # Galaxy Collection Versions API
   "/{prefix}/v3/collections/{namespace}/{name}/versions/":
     parameters:
       - in: path
@@ -221,8 +222,8 @@ paths:
         schema:
           type: string
     get:
-      operationId: "list_versions"
-      tags: ["galaxy: collections"]
+      operationId: "list"
+      tags: ["galaxy: collection versions"]
       parameters:
         - in: query
           name: offset
@@ -263,8 +264,8 @@ paths:
         schema:
           type: string
     get:
-      operationId: "get_version"
-      tags: ["galaxy: collections"]
+      operationId: "get"
+      tags: ["galaxy: collection versions"]
       responses:
         200:
           description: "OK"
@@ -273,6 +274,50 @@ paths:
               schema:
                 type: object
 
+  "/{prefix}/v3/collections/{namespace}/{name}/versions/{version}/certified/":
+    parameters:
+      - in: path
+        name: prefix
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: namespace
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: name
+        required: true
+        schema:
+          type: string
+      - in: path
+        name: version
+        required: true
+        schema:
+          type: string
+    put:
+      operationId: "set_certified"
+      tags: ["galaxy: collection versions"]
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      operationId: "unset_certified"
+      tags: ["galaxy: collection versions"]
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # Galaxy Artifacts API
   "/{prefix}/artifacts/collections/":
     parameters:
       - in: path
@@ -306,6 +351,7 @@ paths:
                     type: string
                     format: uri
 
+  # Galaxy Imports API
   "/{prefix}/imports/collections/{id}/":
     parameters:
       - in: path

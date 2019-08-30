@@ -51,12 +51,12 @@ class TestCollectionVersionViewSet(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-        patcher = mock.patch("galaxy_pulp.GalaxyCollectionsApi")
-        self.collection_api = patcher.start().return_value
+        patcher = mock.patch("galaxy_pulp.GalaxyCollectionVersionsApi", spec=True)
+        self.versions_api = patcher.start().return_value
         self.addCleanup(patcher.stop)
 
     def test_list(self):
-        self.collection_api.list_versions.return_value = galaxy_pulp.ResultsPage(
+        self.versions_api.list.return_value = galaxy_pulp.ResultsPage(
             count=1, results=[]
         )
         response = self.client.get(
@@ -64,12 +64,12 @@ class TestCollectionVersionViewSet(BaseTestCase):
         )
 
         assert response.status_code == 200
-        self.collection_api.list_versions.assert_called_once_with(
+        self.versions_api.list.assert_called_once_with(
             prefix=API_PREFIX, namespace="ansible", name="nginx", limit=10, offset=0
         )
 
     def test_list_limit_offset(self):
-        self.collection_api.list_versions.return_value = galaxy_pulp.ResultsPage(
+        self.versions_api.list.return_value = galaxy_pulp.ResultsPage(
             count=1, results=[]
         )
         response = self.client.get(
@@ -78,18 +78,18 @@ class TestCollectionVersionViewSet(BaseTestCase):
         )
 
         assert response.status_code == 200
-        self.collection_api.list_versions.assert_called_once_with(
+        self.versions_api.list.assert_called_once_with(
             prefix=API_PREFIX, namespace="ansible", name="nginx", limit=10, offset=20
         )
 
     def test_retrieve(self):
-        self.collection_api.get_version.return_value = {}
+        self.versions_api.get.return_value = {}
         response = self.client.get(
             f"/{API_PREFIX}/v3/collections/ansible/nginx/versions/1.2.3/"
         )
 
         assert response.status_code == 200
-        self.collection_api.get_version.assert_called_once_with(
+        self.versions_api.get.assert_called_once_with(
             prefix=API_PREFIX, namespace="ansible", name="nginx", version="1.2.3"
         )
 
@@ -98,7 +98,7 @@ class TestCollectionImportViewSet(BaseTestCase):
     def setUp(self):
         super().setUp()
 
-        patcher = mock.patch("galaxy_pulp.GalaxyImportsApi")
+        patcher = mock.patch("galaxy_pulp.GalaxyImportsApi", spec=True)
         self.imports_api = patcher.start().return_value
         self.addCleanup(patcher.stop)
 
