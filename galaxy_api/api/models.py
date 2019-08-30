@@ -18,6 +18,7 @@ class Namespace(models.Model):
         email: Optional namespace contact email.
         avatar_url: Optional namespace logo URL.
         description: Namespace brief description.
+        resources: Namespace resources page in markdown format.
 
     Relations:
         owners: Reference to namespace owners.
@@ -32,6 +33,7 @@ class Namespace(models.Model):
     email = models.CharField(max_length=256, blank=True)
     avatar_url = models.CharField(max_length=256, blank=True)
     description = models.CharField(max_length=256, blank=True)
+    resources = models.TextField(blank=True)
 
     # References
     owners = models.ManyToManyField(auth_models.Tenant, related_name="namespaces")
