@@ -36,7 +36,7 @@ class Namespace(models.Model):
     resources = models.TextField(blank=True)
 
     # References
-    owners = models.ManyToManyField(auth_models.Tenant, related_name="namespaces")
+    groups = models.ManyToManyField(auth_models.Group, related_name="namespaces")
 
     def __str__(self):
         return self.name

@@ -7,7 +7,10 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import BasePermission
 
-from galaxy_api.auth.models import Tenant, User
+from galaxy_api.auth.models import Group, User
+
+
+RH_ACCOUNT_SCOPE = 'rh-identity-account'
 
 
 class RHIdentityAuthentication(BaseAuthentication):
@@ -45,10 +48,11 @@ class RHIdentityAuthentication(BaseAuthentication):
         first_name = user.get('first_name', '')
         last_name = user.get('last_name', '')
 
-        tenant = self._ensure_tenant(account)
+        group, _ = Group.objects.get_or_create_identity(RH_ACCOUNT_SCOPE, account)
+
         user = self._ensure_user(
             username,
-            tenant,
+            group,
             email=email,
             first_name=first_name,
             last_name=last_name
@@ -57,23 +61,14 @@ class RHIdentityAuthentication(BaseAuthentication):
         return user, {'rh_identity': header}
 
     @staticmethod
-    def _ensure_tenant(account):
-        tenant, created = Tenant.objects.get_or_create(name=account)
-        return tenant
-
-    @staticmethod
-    def _ensure_user(username, tenant, email, first_name, last_name):
+    def _ensure_user(username, group, **attrs):
         with transaction.atomic():
-            user, created = User.objects.get_or_create(
+            user, created = User.objects.update_or_create(
                 username=username,
-                defaults={
-                    'email': email,
-                    'first_name': first_name,
-                    'last_name': last_name,
-                }
+                defaults=attrs,
             )
             if created:
-                tenant.users.add(user)
+                user.groups.add(group)
         return user
 
     @staticmethod

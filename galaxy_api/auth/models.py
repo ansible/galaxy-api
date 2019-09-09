@@ -1,34 +1,35 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
-
-from galaxy_api.common import models as common_models
+from django.contrib.auth import models as auth_models
 
 
 __all__ = (
+    'SYSTEM_SCOPE',
     'User',
-    'Tenant',
+    'Group',
 )
 
 
-class User(AbstractUser):
+SYSTEM_SCOPE = 'system'
+
+
+class User(auth_models.AbstractUser):
     """Custom user model."""
     pass
 
 
-class Tenant(common_models.TimestampsMixin):
-    """
-    Model representing tenant concept.
+class GroupManager(auth_models.GroupManager):
+    def create_identity(self, scope, name):
+        return super().create(name=self._make_name(scope, name))
 
-    Tenant is a special model that usually represents user or
-    group (organization). It allows configuring objects permissions
-    or ownership more flexibly.
+    def get_or_create_identity(self, scope, name):
+        return super().get_or_create(name=self._make_name(scope, name))
 
-    Fields:
-        name: Tenant name.
+    @staticmethod
+    def _make_name(scope, name):
+        return f'{scope}:{name}'
 
-    Relations:
-        users: Many to many relationship with users.
-    """
 
-    name = models.CharField(max_length=150, unique=True)
-    users = models.ManyToManyField(User, related_name='tenants')
+class Group(auth_models.Group):
+    objects = GroupManager()
+
+    class Meta:
+        proxy = True
