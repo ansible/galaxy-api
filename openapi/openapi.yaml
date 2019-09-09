@@ -593,20 +593,206 @@ components:
             - data
 
     CollectionUi:
-      title: 'Collection (UI)'
+      title: 'CollectionUi'
       description: 'Detailed info about a collection used by the ui'
       type: object
       properties:
-        id:
-          type: string
-        namespace:
-          type: object
-        name:
-          type: string
+        all_versions:
+          readOnly: true
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionUiVersionSummary'
         download_count:
           type: integer
+          readOnly: true
+        id:
+          readOnly: true
+          type: integer
         latest_version:
+          $ref: '#/components/schemas/CollectionUiVersionDetail'
+        name:
+          maxLength: 64
+          type: string
+        namespace:
+          readOnly: true
+          $ref: '#/components/schemas/CollectionUiNamespace'
+      required:
+        - name
+        - latest_version
+
+    CollectionUiNamespace:
+      description: 'The v1 style namespace returned by _ui'
+      type: object
+      properties:
+        id:
+          readOnly: true
+          type: integer
+        description:
+          maxLength: 255
+          type: string
+        name:
+          maxLength: 512
+          type: string
+        avatar_url:
+          maxLength: 256
+          nullable: true
+          type: string
+          format: uri
+        company:
+          maxLength: 256
+          nullable: true
+          type: string
+      required:
+      - name
+
+    CollectionUiVersionSummary:
+      type: object
+      title: "Version Summary"
+      properties:
+        id:
+          type: integer
+        version:
+          type: string
+        created:
+          description: 'Timestamp when this object was created.'
+          readOnly: true
+          type: string
+
+    CollectionUiVersionDetail:
+      title: "Version Detail"
+      allOf:
+        - $ref: '#/components/schemas/CollectionUiVersionSummary'
+        - type: object
+          properties:
+            contents:
+              type: array
+              items:
+                $ref: '#/components/schemas/ContentSummary'
+            metadata:
+              $ref: '#/components/schemas/CollectionUiVersionMetadata'
+            docs_blob:
+              type: object
+              properties:
+                collection_readme:
+                  $ref: '#/components/schemas/RenderedDocumentation'
+                documentation_files:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RenderedDocumentation'
+                contents:
+                  type: array
+                  items:
+                    oneOf:
+                      - $ref: '#/components/schemas/PluginContent'
+                      - $ref: '#/components/schemas/RoleContent'
+                      - $ref: '#/components/schemas/PlaybookContent'
+
+          required:
+            - version
+            - metadata
+            - contents
+
+    CollectionUiVersionMetadata:
+      title: 'Metadata (UI)'
+      description: "The Collection Version metadata from collections galaxy.yml or MANIFEST.JSON"
+      type: object
+      properties:
+        tags:
+          type: array
+          items:
+            type: string
+        authors:
+          title: 'Authors'
+          description: 'A list of collection authors'
+          type: array
+          items:
+            $ref: '#/components/schemas/Author'
+        license:
+          $ref: '#/components/schemas/SPDXLicenseId'
+        description:
+          description: 'Description of the collection'
+          type: string
+          nullable: true
+        homepage:
+          type: string
+          format: uri
+        documentation:
+          description: 'Documentation URL'
+          type: string
+          format: uri
+          nullable: true
+        issues:
+          description: 'URL of issues or bug tracking'
+          type: string
+          format: uri
+          nullable: true
+        repository:
+          description: 'SCM repository for collection'
+          type: string
+          format: uri
+          nullable: true
+
+    PluginContent:
+      description: "Info about Plugins"
+      title: "Plugin"
+      type: object
+      properties:
+        content_type:
+          type: string
+        content_name:
+          type: string
+        readme_filename:
+          type: string
+        readme_html:
+          type: string
+        docs_strings:
           type: object
+          description: "The doc strings from a plugin"
+          properties:
+            doc:
+              type: object
+            metadata:
+              type: object
+            return:
+              type: object
+            examples:
+              type: string
+
+    RoleContent:
+      description: "Info about a Role"
+      type: object
+      title: "Role"
+      properties:
+        content_type:
+          type: string
+        content_name:
+          type: string
+        readme_filename:
+          type: string
+        readme_html:
+          type: string
+
+    PlaybookContent:
+      description: "Info about a playbook"
+      type: object
+      title: "Playbook"
+
+    RenderedDocumentation:
+      description: "Documentation in html rendered from markdown or rst"
+      title: "Rendered Documentation File"
+      type: string
+
+    ContentSummary:
+      description: "Summary of info about a plugin, role, or other content"
+      title: "Content Summary"
+      type: object
+      properties:
+        name:
+          type: string
+        content_type:
+          type: string
+        description:
+          type: string
 
     CollectionPageUi:
       description: 'A page of a list of CollectionItems (UI)'
@@ -707,6 +893,70 @@ components:
               description: 'link to the Collection'
               type: string
               format: uri
+
+    CollectionVersionMetadata:
+      title: 'Metadata'
+      description: "The Collection Version metadata from collections galaxy.yml or MANIFEST.JSON"
+      type: object
+      properties:
+        documentation:
+          description: 'Documentation URL'
+          type: string
+          format: uri
+          nullable: true
+        description:
+          description: 'Description of the collection'
+          type: string
+          nullable: true
+        readme:
+          description: 'Name of file to use for README'
+          type: string
+          format: relative-file-path
+        repository:
+          description: 'SCM repository for collection'
+          type: string
+          format: uri
+          nullable: true
+        issues:
+          description: 'URL of issues or bug tracking'
+          type: string
+          format: uri
+          nullable: true
+        version:
+          $ref: '#/components/schemas/SemanticVersion'
+        license_file:
+          description: 'Name of file where license info can be found'
+          type: string
+          format: relative-file-path
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: string
+        dependencies:
+          $ref: '#/components/schemas/CollectionVersionDependencies'
+        license:
+          description: 'A list of SPDX license ids'
+          type: array
+          items:
+            $ref: '#/components/schemas/SPDXLicenseId'
+        name:
+          $ref: '#/components/schemas/CollectionName'
+        namespace:
+          $ref: '#/components/schemas/NamespaceName'
+        authors:
+          title: 'Authors'
+          description: 'A list of collection authors'
+          type: array
+          items:
+            $ref: '#/components/schemas/Author'
+        homepage:
+          type: string
+          format: uri
+      required:
+        - namespace
+        - name
+        - version
 
     CollectionVersionListItem:
       type: object
