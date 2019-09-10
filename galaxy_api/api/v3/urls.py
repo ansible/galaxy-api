@@ -29,10 +29,10 @@ urlpatterns = [
     ),
     path(
         'artifacts/collections/',
-        viewsets.CollectionArtifactViewSet.as_view({'post': 'upload'}),
+        viewsets.CollectionArtifactUploadView.as_view(),
     ),
     path(
         'artifacts/collections/<str:filename>',
-        viewsets.CollectionArtifactViewSet.as_view({'get': 'download'}),
+        viewsets.CollectionArtifactDownloadView.as_view(),
     ),
 ]

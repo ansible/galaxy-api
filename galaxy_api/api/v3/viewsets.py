@@ -12,14 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
-import mimetypes
 
 from django.conf import settings
 import galaxy_pulp
+from django.core.exceptions import ValidationError
+from rest_framework import views
 from rest_framework.response import Response
 from rest_framework import viewsets
+from rest_framework.settings import api_settings
 
+from galaxy_api.api.models import Namespace
+from galaxy_api.api.v3.serializers import CollectionUploadSerializer
 from galaxy_api.common import pulp
+from galaxy_api.api import permissions
 
 
 class CollectionViewSet(viewsets.GenericViewSet):
@@ -78,21 +83,37 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
         return Response(response)
 
 
-class CollectionArtifactViewSet(viewsets.ViewSet):
+class CollectionImportViewSet(viewsets.ViewSet):
 
-    def upload(self, request, *args, **kwargs):
-        # TODO: Validate namespace
-        # TODO: Validate namespace permissions
+    def retrieve(self, request, pk):
+        api = galaxy_pulp.GalaxyImportsApi(pulp.get_client())
+        response = api.get(prefix=settings.API_PATH_PREFIX, id=pk)
+        return Response(response)
 
-        file = request.data['file']
-        mimetype = (mimetypes.guess_type(file.name)[0] or 'application/octet-stream')
-        post_params = [
-            ('file', (file.name, file.read(), mimetype))
-        ]
 
-        sha256 = request.data.get('sha256')
-        if sha256:
-            post_params.append(('sha256', sha256))
+class CollectionArtifactUploadView(views.APIView):
+
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
+        permissions.IsNamespaceOwner,
+    ]
+
+    def post(self, request, *args, **kwargs):
+        serializer = CollectionUploadSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+
+        try:
+            namespace = Namespace.objects.get(name=data['filename'].namespace)
+        except Namespace.DoesNotExist:
+            raise ValidationError(
+                'Namespace "{0}" does not exist.'.format(data['filename'].namespace)
+            )
+
+        self.check_object_permissions(request, namespace)
+
+        post_params = [('file', (data['file'].name, data['file'].read(), data['mimetype']))]
+        if data['sha256']:
+            post_params.append(('sha256', data['sha256']))
 
         api = pulp.get_client()
         url = '{host}/{prefix}{path}'.format(
@@ -120,13 +141,7 @@ class CollectionArtifactViewSet(viewsets.ViewSet):
             data = json.loads(data)
         return Response(data=data, status=status)
 
+
+class CollectionArtifactDownloadView(views.APIView):
     def download(self, request, *args, **kwargs):
         pass
-
-
-class CollectionImportViewSet(viewsets.ViewSet):
-
-    def retrieve(self, request, pk):
-        api = galaxy_pulp.GalaxyImportsApi(pulp.get_client())
-        response = api.get(prefix=settings.API_PATH_PREFIX, id=pk)
-        return Response(response)

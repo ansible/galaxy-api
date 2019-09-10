@@ -5,8 +5,9 @@ from rest_framework.decorators import action as drf_action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.settings import api_settings
 
-from galaxy_api.api import models
+from galaxy_api.api import models, permissions
 from galaxy_api.api.ui import serializers
 from galaxy_api.common import pulp
 
@@ -96,10 +97,20 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
         data = serializers.CollectionVersionSerializer(response.results[0]).data
         return Response(data)
 
-    @drf_action(methods=["PUT", "DELETE"], detail=True, url_path="certified")
+    @drf_action(
+        methods=["PUT", "DELETE"],
+        detail=True,
+        url_path="certified",
+        permission_classes=api_settings.DEFAULT_PERMISSION_CLASSES + [
+            permissions.IsPartnerEngineer
+        ],
+    )
     def set_certified(self, request, *args, **kwargs):
         namespace, name = self.kwargs['collection'].split('/')
         version = self.kwargs['version']
+
+        namespace_obj = get_object_or_404(models.Namespace, name=namespace)
+        self.check_object_permissions(request, namespace_obj)
 
         api = galaxy_pulp.GalaxyCollectionVersionsApi(pulp.get_client())
 
