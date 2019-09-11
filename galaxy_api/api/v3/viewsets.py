@@ -24,7 +24,7 @@ from rest_framework.settings import api_settings
 from galaxy_api.api.models import Namespace
 from galaxy_api.api.v3.serializers import CollectionUploadSerializer
 from galaxy_api.common import pulp
-from galaxy_api.api import permissions
+from galaxy_api.api import permissions, models
 
 
 class CollectionViewSet(viewsets.GenericViewSet):
@@ -92,7 +92,6 @@ class CollectionImportViewSet(viewsets.ViewSet):
 
 
 class CollectionArtifactUploadView(views.APIView):
-
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
         permissions.IsNamespaceOwner,
     ]
@@ -100,20 +99,18 @@ class CollectionArtifactUploadView(views.APIView):
     def post(self, request, *args, **kwargs):
         serializer = CollectionUploadSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
+
         data = serializer.validated_data
+        filename = data['filename']
 
         try:
-            namespace = Namespace.objects.get(name=data['filename'].namespace)
+            namespace = Namespace.objects.get(name=filename.namespace)
         except Namespace.DoesNotExist:
             raise ValidationError(
-                'Namespace "{0}" does not exist.'.format(data['filename'].namespace)
+                'Namespace "{0}" does not exist.'.format(filename.namespace)
             )
 
         self.check_object_permissions(request, namespace)
-
-        post_params = [('file', (data['file'].name, data['file'].read(), data['mimetype']))]
-        if data['sha256']:
-            post_params.append(('sha256', data['sha256']))
 
         api = pulp.get_client()
         url = '{host}/{prefix}{path}'.format(
@@ -121,25 +118,46 @@ class CollectionArtifactUploadView(views.APIView):
             prefix=settings.API_PATH_PREFIX,
             path='/v3/artifacts/collections/',
         )
-        try:
-            response = api.request(
-                'POST',
-                url,
-                headers={'Content-Type': 'multipart/form-data'},
-                post_params=post_params,
-            )
-        except galaxy_pulp.ApiException as exc:
-            status = exc.status
-            data = exc.body
-            headers = exc.headers
-        else:
-            status = response.status
-            data = response.data
-            headers = response.getheaders()
 
-        if headers['Content-Type'] == 'application/json':
-            data = json.loads(data)
-        return Response(data=data, status=status)
+        post_params = self._prepare_post_params(data)
+        upload_response = api.request(
+            'POST',
+            url,
+            headers={'Content-Type': 'multipart/form-data'},
+            post_params=post_params,
+        )
+        upload_response_data = json.loads(upload_response.data)
+
+        task_detail = api.call_api(
+            upload_response_data['task'],
+            'GET',
+            auth_settings=['BasicAuth'],
+            response_type='CollectionImport',
+            _return_http_data_only=True,
+        )
+
+        models.CollectionImport.objects.create(
+            task_id=task_detail.id,
+            created_at=task_detail.created_at,
+            namespace=namespace,
+            name=data['filename'].name,
+            version=data['filename'].version,
+        )
+
+        return Response(data=upload_response_data, status=upload_response.status)
+
+    @staticmethod
+    def _prepare_post_params(data):
+        filename = data['filename']
+        post_params = [
+            ('file', (data['file'].name, data['file'].read(), data['mimetype'])),
+            ('expected_namespace', filename.namespace),
+            ('expected_name', filename.name),
+            ('expected_version', filename.version),
+        ]
+        if data['sha256']:
+            post_params.append(('sha256', data['sha256']))
+        return post_params
 
 
 class CollectionArtifactDownloadView(views.APIView):

@@ -11,6 +11,7 @@ dynaconf = ">=2.0.3,<3.0"
 requests = "*"
 pulpcore-client = "*"
 pulp-ansible-client = "*"
+django-filter = "*"
 
 [dev-packages]
 flake8 = "*"

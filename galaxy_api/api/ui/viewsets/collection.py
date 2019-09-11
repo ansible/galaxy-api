@@ -1,5 +1,7 @@
 import galaxy_pulp
 from django.conf import settings
+from django_filters import filters
+from django_filters.rest_framework import filterset, DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action as drf_action
 from rest_framework.exceptions import NotFound
@@ -128,29 +130,37 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
         return Response(response)
 
 
+class CollectionImportFilter(filterset.FilterSet):
+    namespace = filters.CharFilter(field_name='namespace__name')
+
+    class Meta:
+        model = models.CollectionImport
+        fields = ['namespace', 'name', 'version']
+
+
 class CollectionImportViewSet(viewsets.GenericViewSet):
-    lookup_url_kwarg = 'id'
+    lookup_field = 'task_id'
+    queryset = models.CollectionImport.objects.all()
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = CollectionImportFilter
 
     def list(self, request, *args, **kwargs):
-        self.paginator.init_from_request(request)
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
 
-        params = self.request.query_params.dict()
-        params.update({
-            'offset': self.paginator.offset,
-            'limit': self.paginator.limit,
-        })
+        api = galaxy_pulp.GalaxyImportsApi(pulp.get_client())
 
-        api_client = pulp.get_client()
-        api = galaxy_pulp.PulpImportsApi(api_client)
-
-        response = api.list(**params)
-
-        return self.paginator.paginate_proxy_response(response.results, response.count)
+        results = []
+        for task in page:
+            task_info = api.get(prefix=settings.API_PATH_PREFIX, id=str(task.pk))
+            data = serializers.ImportTaskListSerializer(task_info, context={'task_obj': task}).data
+            results.append(data)
+        return self.get_paginated_response(results)
 
     def retrieve(self, request, *args, **kwargs):
-        api_client = pulp.get_client()
-        api = galaxy_pulp.PulpImportsApi(api_client)
-
-        result = api.get(id=self.kwargs['id'])
-
-        return Response(result)
+        api = galaxy_pulp.GalaxyImportsApi(pulp.get_client())
+        task = self.get_object()
+        task_info = api.get(prefix=settings.API_PATH_PREFIX, id=self.kwargs['task_id'])
+        data = serializers.ImportTaskDetailSerializer(task_info, context={'task_obj': task}).data
+        return Response(data)
