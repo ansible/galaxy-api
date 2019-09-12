@@ -130,6 +130,10 @@ PULP_API_PORT = 8000
 PULP_API_USER = 'admin'
 PULP_API_PASSWORD = 'admin'
 
+PULP_CONTENT_HOST = 'pulp-content-app'
+PULP_CONTENT_PORT = 24816
+PULP_CONTENT_PATH_PREFIX = '/api/automation-hub/artifacts/collections/'
+
 ################################################################################
 #                                   FOOTER                                     #
 ################################################################################
