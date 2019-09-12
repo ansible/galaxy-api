@@ -7,7 +7,7 @@ info:
 
 paths:
   # Pulp Collections API
-  "/pulp/api/v3/content/ansible/collections/":
+  "/pulp/api/v3/content/ansible/collection_versions/":
     get:
       operationId: "list"
       tags: ["pulp: collections"]
@@ -46,7 +46,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResultsPage'
 
-  "/pulp/api/v3/content/ansible/collections/{id}/":
+  "/pulp/api/v3/content/ansible/collection_versions/{id}/":
     parameters:
       - in: path
         name: id
