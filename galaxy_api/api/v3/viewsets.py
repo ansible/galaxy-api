@@ -13,10 +13,13 @@
 # limitations under the License.
 import json
 
+import requests
 from django.conf import settings
 import galaxy_pulp
 from django.core.exceptions import ValidationError
+from django.http import StreamingHttpResponse, HttpResponseRedirect
 from rest_framework import views
+from rest_framework.exceptions import APIException, NotFound
 from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework.settings import api_settings
@@ -161,5 +164,27 @@ class CollectionArtifactUploadView(views.APIView):
 
 
 class CollectionArtifactDownloadView(views.APIView):
-    def download(self, request, *args, **kwargs):
-        pass
+    def get(self, request, *args, **kwargs):
+        # NOTE(cutwater): Using urllib3 because it's already a dependency of pulp_galaxy
+        url = 'http://{host}:{port}/{prefix}/automation-hub/{filename}'.format(
+            host=settings.PULP_CONTENT_HOST,
+            port=settings.PULP_CONTENT_PORT,
+            prefix=settings.PULP_CONTENT_PATH_PREFIX.strip('/'),
+            filename=self.kwargs['filename'],
+        )
+        response = requests.get(url, stream=True, allow_redirects=False)
+
+        if response.status_code == requests.codes.not_found:
+            raise NotFound()
+
+        if response.status_code == requests.codes.found:
+            return HttpResponseRedirect(response.headers['Location'])
+
+        if response.status_code == requests.codes.ok:
+            return StreamingHttpResponse(
+                response.content,
+                content_type=response.headers['Content-Type']
+            )
+
+        raise APIException('Unexpected response from content app. '
+                           f'Code: {response.status_code}.')
