@@ -83,6 +83,7 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
             name=self.kwargs['name'],
             version=self.kwargs['version'],
         )
+        response['download_url'] = request.build_absolute_uri(response['download_url'])
         return Response(response)
 
 
