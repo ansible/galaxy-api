@@ -249,6 +249,7 @@ paths:
         - $ref: '#/components/parameters/SearchName'
         - $ref: '#/components/parameters/SearchNamespace'
         - $ref: '#/components/parameters/SearchTag'
+        - $ref: '#/components/parameters/SearchVersion'
       tags:
         - 'UI: Collections'
       responses:
@@ -270,6 +271,8 @@ paths:
       operationId: getCollectionUi
       tags:
         - 'UI: Collections'
+      parameters:
+        - $ref: '#/components/parameters/SearchVersion'
       responses:
         '200':
           description: 'A collection object'
@@ -279,6 +282,45 @@ paths:
                 $ref: '#/components/schemas/CollectionUi'
         'default':
             $ref: '#/components/responses/Errors'
+
+  '/_ui/collections/{namespace}/{name}/versions/':
+    parameters:
+      - $ref: '#/components/parameters/CollectionNamespaceName'
+      - $ref: '#/components/parameters/CollectionName'
+    get:
+      summary: Get Collection version summarys(UI)
+      operationId: getCollectionUiVersionSummary
+      tags:
+        - 'UI: Collections'
+      responses:
+        '200':
+          description: 'Paginated list of Version summaries'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionUiVersionUiSummaryPage'
+        'default':
+          $ref: '#/components/responses/Errors'
+
+  '/_ui/collections/{namespace}/{name}/versions/{version}':
+    parameters:
+      - $ref: '#/components/parameters/CollectionNamespaceName'
+      - $ref: '#/components/parameters/CollectionName'
+      - $ref: '#/components/parameters/SemanticVersion'
+    get:
+      summary: Get Collection version summarys(UI)
+      operationId: getCollectionUiVersionSummary
+      tags:
+        - 'UI: Collections'
+      responses:
+        '200':
+          description: 'A collection version for UI'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionUi'
+        'default':
+          $ref: '#/components/responses/Errors'
 
 # -------------------------------------
 # UI: Imports
@@ -620,6 +662,24 @@ components:
         - name
         - latest_version
 
+    CollectionUiDocsBlob:
+      description: Rendered docs for UI
+      type: object
+      properties:
+        collection_readme:
+          $ref: '#/components/schemas/RenderedDocumentation'
+        documentation_files:
+          type: array
+          items:
+            $ref: '#/components/schemas/RenderedDocumentation'
+        contents:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/PluginContent'
+              - $ref: '#/components/schemas/RoleContent'
+              - $ref: '#/components/schemas/PlaybookContent'
+
     CollectionUiNamespace:
       description: 'The v1 style namespace returned by _ui'
       type: object
@@ -657,40 +717,78 @@ components:
           description: 'Timestamp when this object was created.'
           readOnly: true
           type: string
+      required:
+        - version
+
+    CollectionUiVersionBase:
+      type: object
+      title: "Version base"
+      properties:
+        contents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentSummary'
+        metadata:
+          $ref: '#/components/schemas/CollectionUiVersionMetadata'
+        docs_blob:
+          $ref: '#/components/schemas/CollectionUiDocsBlob'
+      required:
+        - metadata
+        - contents
+
+    CollectionUiVersionUiDetail:
+      type: object
+      title: "Version details for ui for a specific collection version"
+      properties:
+        metadata:
+          $ref: '#/components/schemas/CollectionUiVersionMetadata'
+        docs_blob:
+          $ref: '#/components/schemas/CollectionUiDocsBlob'
+
+    CollectionUiVersionUiSummary:
+      type: object
+      title: "Version summary for ui display of a specific collection"
+      properties:
+        contents:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentSummary'
+        created_at:
+          description: 'Timestamp when this object was created.'
+          readOnly: true
+          type: string
+          format: date-time
+        docs_blob:
+          $ref: '#/components/schemas/CollectionUiDocsBlob'
+        name:
+          maxLength: 64
+          type: string
+        namespace:
+          maxLength: 512
+          type: string
+        version:
+          $ref: '#/components/schemas/SemanticVersion'
+
+    CollectionUiVersionUiSummaryPage:
+      description: 'A page of a list of Version summaries for ui'
+      allOf:
+        - $ref: '#/components/schemas/PageInfo'
+        - type: object
+          properties:
+            data:
+              description: 'List of Version summaries for this Page'
+              title: 'UI Version Summary'
+              type: array
+              items:
+                $ref: '#/components/schemas/CollectionUiVersionUiSummary'
+          required:
+            - data
 
     CollectionUiVersionDetail:
       title: "Version Detail"
       allOf:
         - $ref: '#/components/schemas/CollectionUiVersionSummary'
-        - type: object
-          properties:
-            contents:
-              type: array
-              items:
-                $ref: '#/components/schemas/ContentSummary'
-            metadata:
-              $ref: '#/components/schemas/CollectionUiVersionMetadata'
-            docs_blob:
-              type: object
-              properties:
-                collection_readme:
-                  $ref: '#/components/schemas/RenderedDocumentation'
-                documentation_files:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/RenderedDocumentation'
-                contents:
-                  type: array
-                  items:
-                    oneOf:
-                      - $ref: '#/components/schemas/PluginContent'
-                      - $ref: '#/components/schemas/RoleContent'
-                      - $ref: '#/components/schemas/PlaybookContent'
-
-          required:
-            - version
-            - metadata
-            - contents
+        - $ref: '#/components/schemas/CollectionUiVersionBase'
 
     CollectionUiVersionMetadata:
       title: 'Metadata (UI)'
@@ -1467,6 +1565,14 @@ components:
       required: false
       schema:
         type: string
+
+    SearchVersion:
+      description: 'Search for a version'
+      in: query
+      name: version
+      required: false
+      schema:
+        $ref: '#/components/schemas/SemanticVersion'
 
     SemanticVersion:
       description: 'A Semantic Version string'
