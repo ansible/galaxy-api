@@ -13,11 +13,6 @@ from galaxy_api.api import models, permissions
 from galaxy_api.api.ui import serializers
 from galaxy_api.common import pulp
 
-import logging
-import pprint
-log = logging.getLogger(__name__)
-pf = pprint.pformat
-
 
 class CollectionViewSet(viewsets.GenericViewSet):
     lookup_url_kwarg = 'collection'
@@ -26,17 +21,17 @@ class CollectionViewSet(viewsets.GenericViewSet):
     def list(self, request, *args, **kwargs):
         self.paginator.init_from_request(request)
 
-        params = self.request.query_params.dict()
-        params.update({
+        params = {
             'offset': self.paginator.offset,
             'limit': self.paginator.limit,
-        })
-
-        if params.get('version', '') == '':
-            params['is_highest'] = True
+        }
+        for key, value in self.request.query_params.lists():
+            if key == 'keywords':
+                key = 'q'
+            params[key] = ' '.join(value)
 
         api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
-        response = api.list(**params)
+        response = api.list(is_highest=True, **params)
 
         namespaces = set(collection['namespace'] for collection in response.results)
         namespaces = self._query_namespaces(namespaces)
