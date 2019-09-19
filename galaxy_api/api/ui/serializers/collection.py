@@ -88,6 +88,7 @@ class _CollectionSerializer(serializers.Serializer):
     name = serializers.CharField()
     download_count = serializers.IntegerField(default=0)
     latest_version = CollectionLatestVersionSerializer(source='*')
+    is_certified = serializers.BooleanField()
 
     def _get_namespace(self, obj):
         raise NotImplementedError
