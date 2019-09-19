@@ -7,9 +7,8 @@ from rest_framework.reverse import reverse
 
 class ApiRootView(views.APIView):
     def get(self, request):
-        root_url = reverse("api:root")
         data = {
-            "available_versions": {"v3": f"{root_url}v3/"},
+            "available_versions": {"v3": "v3/"},
         }
         return Response(data)
 

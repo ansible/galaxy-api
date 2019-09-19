@@ -7,5 +7,5 @@ class TestApiRootView(BaseTestCase):
 
         assert response.status_code == 200
         assert response.data == {
-            "available_versions": {"v3": f"/{API_PREFIX}/v3/"},
+            "available_versions": {"v3": "v3/"},
         }
