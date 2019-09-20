@@ -183,7 +183,7 @@ class CollectionArtifactDownloadView(views.APIView):
 
         if response.status_code == requests.codes.ok:
             return StreamingHttpResponse(
-                response.content,
+                response.iter_content(chunk_size=4096),
                 content_type=response.headers['Content-Type']
             )
 
