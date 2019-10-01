@@ -1,11 +1,14 @@
 from django.http import HttpResponseRedirect
 
 from rest_framework import views
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 
 
 class ApiRootView(views.APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get(self, request):
         data = {
             "available_versions": {"v3": "v3/"},
@@ -19,5 +22,7 @@ class SlashApiRedirectView(views.APIView):
     This is a workaround for https://github.com/ansible/ansible/issues/62073.
     This can be removed when ansible-galaxy stops appending '/api' to the url.'''
 
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get(self, request):
-        return HttpResponseRedirect(reverse('api:root'))
+        return HttpResponseRedirect(reverse('api:root'), status=307)

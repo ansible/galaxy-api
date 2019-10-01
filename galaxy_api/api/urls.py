@@ -23,4 +23,5 @@ urlpatterns = [
     # This can be removed when ansible-galaxy stops appending '/api' to the
     # urls.
     path("api/", views.SlashApiRedirectView.as_view(), name="compat_redirect"),
+    path("api", views.SlashApiRedirectView.as_view(), name="compat_redirect"),
 ]
