@@ -1733,6 +1733,15 @@ components:
         WWW-Authenticate:
           schema:
             type: string
+            enum:
+              - Basic
+              - Token
+              - Bearer
+          description: >
+            Authentication Types:
+             * `Basic` - HTTP Basic Auth
+             * `Token` - Django style auth token, used with Galaxy API v2.
+             * `Bearer` - Bearer token, used with Galaxy API v3
       content:
         application/json:
           schema:
