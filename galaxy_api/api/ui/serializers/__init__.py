@@ -8,7 +8,10 @@ from .imports import (
     ImportTaskDetailSerializer,
     ImportTaskListSerializer,
 )
-from .namespace import NamespaceSerializer
+from .namespace import (
+    NamespaceSerializer,
+    NamespaceSummarySerializer
+)
 
 
 __all__ = (
@@ -19,4 +22,5 @@ __all__ = (
     'ImportTaskDetailSerializer',
     'ImportTaskListSerializer',
     'NamespaceSerializer',
+    'NamespaceSummarySerializer'
 )

@@ -41,11 +41,28 @@ class NamespaceViewSet(
     viewsets.GenericViewSet,
 ):
     lookup_field = "name"
-    serializer_class = serializers.NamespaceSerializer
-    queryset = models.Namespace.objects.all()
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
         permissions.IsNamespaceOwnerOrReadOnly
     ]
+
     filter_backends = (DjangoFilterBackend,)
 
     filterset_class = NamespaceFilter
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return serializers.NamespaceSummarySerializer
+        else:
+            return serializers.NamespaceSerializer
+
+    def get_queryset(self):
+        return models.Namespace.objects.all()
+
+
+class MyNamespaceViewSet(NamespaceViewSet):
+    def get_queryset(self):
+        # FIXME(cutwater): this view should aso return all the namespaces if
+        # the user is part of the partner engineering team. Don't know how
+        # we plan to handle that.
+        return models.Namespace.objects.filter(
+            groups__in=self.request.user.groups.all())

@@ -5,7 +5,8 @@ from . import viewsets
 
 
 router = routers.SimpleRouter()
-router.register('namespaces', viewsets.NamespaceViewSet)
+router.register('namespaces', viewsets.NamespaceViewSet, basename='namespaces')
+router.register('my-namespaces', viewsets.MyNamespaceViewSet, basename='namespaces')
 router.register('collections', viewsets.CollectionViewSet, basename='collections')
 router.register(
     'collections/(?P<collection>{})/versions'.format(
