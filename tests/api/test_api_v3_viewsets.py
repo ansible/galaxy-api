@@ -55,9 +55,22 @@ class TestCollectionVersionViewSet(BaseTestCase):
         self.versions_api = patcher.start().return_value
         self.addCleanup(patcher.stop)
 
-    def test_list(self):
+    def test_list_empty(self):
         self.versions_api.list.return_value = galaxy_pulp.ResultsPage(
             count=1, results=[]
+        )
+        response = self.client.get(
+            f"/{API_PREFIX}/v3/collections/ansible/nginx/versions/"
+        )
+
+        assert response.status_code == 404
+        self.versions_api.list.assert_called_once_with(
+            prefix=API_PREFIX, namespace="ansible", name="nginx", limit=10, offset=0
+        )
+
+    def test_list(self):
+        self.versions_api.list.return_value = galaxy_pulp.ResultsPage(
+            count=1, results=[{}]
         )
         response = self.client.get(
             f"/{API_PREFIX}/v3/collections/ansible/nginx/versions/"
@@ -70,7 +83,7 @@ class TestCollectionVersionViewSet(BaseTestCase):
 
     def test_list_limit_offset(self):
         self.versions_api.list.return_value = galaxy_pulp.ResultsPage(
-            count=1, results=[]
+            count=1, results=[{}]
         )
         response = self.client.get(
             f"/{API_PREFIX}/v3/collections/ansible/nginx/versions/",
@@ -78,6 +91,20 @@ class TestCollectionVersionViewSet(BaseTestCase):
         )
 
         assert response.status_code == 200
+        self.versions_api.list.assert_called_once_with(
+            prefix=API_PREFIX, namespace="ansible", name="nginx", limit=10, offset=20
+        )
+
+    def test_list_limit_offset_empty(self):
+        self.versions_api.list.return_value = galaxy_pulp.ResultsPage(
+            count=1, results=[]
+        )
+        response = self.client.get(
+            f"/{API_PREFIX}/v3/collections/ansible/nginx/versions/",
+            data={"limit": 10, "offset": 20},
+        )
+
+        assert response.status_code == 404
         self.versions_api.list.assert_called_once_with(
             prefix=API_PREFIX, namespace="ansible", name="nginx", limit=10, offset=20
         )
