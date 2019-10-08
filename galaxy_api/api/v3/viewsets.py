@@ -73,6 +73,11 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
             name=self.kwargs['name'],
             **params,
         )
+
+        # Consider an empty list of versions as a 404 on the Collection
+        if not response.results:
+            raise NotFound()
+
         return self.paginator.paginate_proxy_response(response.results, response.count)
 
     def retrieve(self, request, *args, **kwargs):
