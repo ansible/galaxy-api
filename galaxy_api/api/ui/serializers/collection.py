@@ -70,7 +70,7 @@ class CollectionVersionBaseSerializer(serializers.Serializer):
 
 
 class CollectionLatestVersionSerializer(CollectionVersionBaseSerializer):
-    metadata = CollectionMetadataBaseSerializer(source='*')
+    metadata = CollectionMetadataSerializer(source='*')
     contents = serializers.ListField(ContentSerializer())
 
 
