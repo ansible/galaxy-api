@@ -31,7 +31,12 @@ class CollectionViewSet(viewsets.GenericViewSet):
             params[key] = ' '.join(value)
 
         api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
-        response = api.list(is_highest=True, **params)
+
+        response = api.list(
+            is_highest=True,
+            exclude_fields='docs_blob',
+            **params
+        )
 
         namespaces = set(collection['namespace'] for collection in response.results)
         namespaces = self._query_namespaces(namespaces)
@@ -52,29 +57,40 @@ class CollectionViewSet(viewsets.GenericViewSet):
 
         api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
 
-        response = api.list(namespace=namespace, name=name)
+        params = {
+            'namespace': namespace,
+            'name': name,
+        }
+
+        if version == '':
+            params['is_highest'] = True
+        else:
+            params['version'] = version
+
+        response = api.list(**params)
 
         if not response.results:
             raise NotFound()
 
-        all_versions = [{'version': collection['version'],
-                         'id': collection['id'],
-                         'created': collection['pulp_created']} for collection in response.results]
+        all_versions = api.list(
+            namespace=namespace,
+            name=name,
+            fields='version,id,pulp_created,artifact'
+        )
 
-        if version != '':
-            matching_collections = [collection for collection in response.results
-                                    if collection['version'] == version]
-        else:
-            matching_collections = response.results
+        all_versions = [
+            {
+                'version': collection['version'],
+                'id': collection['id'],
+                'created': collection['pulp_created']
+            } for collection in all_versions.results
+        ]
 
-        if not matching_collections:
-            raise NotFound()
-
-        highest_matching_collection = matching_collections[-1]
+        collection = response.results[0]
 
         data = serializers.CollectionDetailSerializer(
-            highest_matching_collection, context={'namespace': namespace_obj,
-                                                  'all_versions': all_versions}
+            collection,
+            context={'namespace': namespace_obj, 'all_versions': all_versions}
         ).data
 
         return Response(data)

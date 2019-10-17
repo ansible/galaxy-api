@@ -42,6 +42,14 @@ paths:
           name: q
           schema:
             type: string
+        - in: query
+          name: fields
+          schema:
+            type: string
+        - in: query
+          name: exclude_fields
+          schema:
+            type: string
       responses:
         200:
           description: 'OK'
