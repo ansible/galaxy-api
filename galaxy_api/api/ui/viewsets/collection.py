@@ -75,7 +75,7 @@ class CollectionViewSet(viewsets.GenericViewSet):
         all_versions = api.list(
             namespace=namespace,
             name=name,
-            fields='version,id,_created,artifact'
+            fields='version,id,pulp_created,artifact'
         )
 
         all_versions = [{'version': collection['version'],
