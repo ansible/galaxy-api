@@ -137,7 +137,7 @@ class TestCollectionImportViewSet(BaseTestCase):
         self.addCleanup(patcher.stop)
 
     def test_retrieve(self):
-        self.imports_api.get.return_value = {}
+        self.imports_api.get.return_value = galaxy_pulp.CollectionImport()
         response = self.client.get(
             f"/{API_PREFIX}/v3/imports/collections/3e26b82c-702f-4bdd-a568-7d9db17759c1/"
         )
