@@ -40,17 +40,7 @@ class CollectionVersionSummarySerializer(serializers.Serializer):
     created = serializers.CharField()
 
 
-class CollectionMetadataBaseSerializer(serializers.Serializer):
-    description = serializers.CharField()
-    authors = serializers.ListField(serializers.CharField())
-    license = serializers.ListField(serializers.CharField())
-    tags = serializers.SerializerMethodField()
-
-    def get_tags(self, metadata):
-        return [tag['name'] for tag in metadata['tags']]
-
-
-class CollectionMetadataSerializer(CollectionMetadataBaseSerializer):
+class CollectionMetadataSerializer(serializers.Serializer):
     dependencies = serializers.JSONField()
     contents = serializers.JSONField()
 
@@ -59,6 +49,14 @@ class CollectionMetadataSerializer(CollectionMetadataBaseSerializer):
     homepage = serializers.CharField()
     issues = serializers.CharField()
     repository = serializers.CharField()
+
+    description = serializers.CharField()
+    authors = serializers.ListField(serializers.CharField())
+    license = serializers.ListField(serializers.CharField())
+    tags = serializers.SerializerMethodField()
+
+    def get_tags(self, metadata):
+        return [tag['name'] for tag in metadata['tags']]
 
 
 class CollectionVersionBaseSerializer(serializers.Serializer):
@@ -69,17 +67,13 @@ class CollectionVersionBaseSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField(source='pulp_created')
 
 
-class CollectionLatestVersionSerializer(CollectionVersionBaseSerializer):
-    metadata = CollectionMetadataBaseSerializer(source='*')
+class CollectionVersionSerializer(CollectionVersionBaseSerializer):
+    metadata = CollectionMetadataSerializer(source='*')
     contents = serializers.ListField(ContentSerializer())
 
 
-class CollectionLatestVersionDetailSerializer(CollectionLatestVersionSerializer):
+class CollectionVersionDetailSerializer(CollectionVersionSerializer):
     docs_blob = serializers.JSONField()
-
-
-class CollectionVersionSerializer(CollectionMetadataBaseSerializer):
-    metadata = CollectionMetadataSerializer(source="*")
 
 
 class _CollectionSerializer(serializers.Serializer):
@@ -87,7 +81,7 @@ class _CollectionSerializer(serializers.Serializer):
     namespace = serializers.SerializerMethodField()
     name = serializers.CharField()
     download_count = serializers.IntegerField(default=0)
-    latest_version = CollectionLatestVersionSerializer(source='*')
+    latest_version = CollectionVersionSerializer(source='*')
     is_certified = serializers.BooleanField()
 
     def _get_namespace(self, obj):
@@ -105,7 +99,7 @@ class CollectionListSerializer(_CollectionSerializer):
 
 
 class CollectionDetailSerializer(_CollectionSerializer):
-    latest_version = CollectionLatestVersionDetailSerializer(source='*')
+    latest_version = CollectionVersionDetailSerializer(source='*')
     all_versions = serializers.SerializerMethodField()
 
     def _get_namespace(self, obj):

@@ -123,7 +123,7 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
         if not response.results:
             raise NotFound()
 
-        data = serializers.CollectionVersionSerializer(response.results[0]).data
+        data = serializers.CollectionVersionDetailSerializer(response.results[0]).data
         return Response(data)
 
     @drf_action(
