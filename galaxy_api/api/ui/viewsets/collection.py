@@ -78,9 +78,13 @@ class CollectionViewSet(viewsets.GenericViewSet):
             fields='version,id,pulp_created,artifact'
         )
 
-        all_versions = [{'version': collection['version'],
-                         'id': collection['id'],
-                         'created': collection['pulp_created']} for collection in all_versions.results]
+        all_versions = [
+            {
+                'version': collection['version'],
+                'id': collection['id'],
+                'created': collection['pulp_created']
+            } for collection in all_versions.results
+        ]
 
         collection = response.results[0]
 
