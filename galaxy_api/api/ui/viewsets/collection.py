@@ -59,7 +59,7 @@ class CollectionViewSet(viewsets.GenericViewSet):
 
         all_versions = [{'version': collection['version'],
                          'id': collection['id'],
-                         'created': collection['_created']} for collection in response.results]
+                         'created': collection['pulp_created']} for collection in response.results]
 
         if version != '':
             matching_collections = [collection for collection in response.results

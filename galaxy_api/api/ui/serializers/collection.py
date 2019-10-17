@@ -66,7 +66,7 @@ class CollectionVersionBaseSerializer(serializers.Serializer):
     name = serializers.CharField()
     version = serializers.CharField()
 
-    created_at = serializers.DateTimeField(source='_created')
+    created_at = serializers.DateTimeField(source='pulp_created')
 
 
 class CollectionLatestVersionSerializer(CollectionVersionBaseSerializer):
