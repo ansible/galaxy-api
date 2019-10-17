@@ -2,6 +2,7 @@ from .collection import (
     CollectionDetailSerializer,
     CollectionListSerializer,
     CollectionVersionSerializer,
+    CollectionVersionDetailSerializer,
     CollectionVersionBaseSerializer,
 )
 from .imports import (
@@ -18,6 +19,7 @@ __all__ = (
     'CollectionDetailSerializer',
     'CollectionListSerializer',
     'CollectionVersionSerializer',
+    'CollectionVersionDetailSerializer',
     'CollectionVersionBaseSerializer',
     'ImportTaskDetailSerializer',
     'ImportTaskListSerializer',
