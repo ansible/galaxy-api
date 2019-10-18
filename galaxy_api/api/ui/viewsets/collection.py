@@ -28,7 +28,10 @@ class CollectionViewSet(viewsets.GenericViewSet):
         for key, value in self.request.query_params.lists():
             if key == 'keywords':
                 key = 'q'
-            params[key] = ' '.join(value)
+            if isinstance(value, list):
+                params[key] = ','.join(value)
+            else:
+                params[key] = value
 
         api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
 

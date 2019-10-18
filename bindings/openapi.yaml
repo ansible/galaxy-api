@@ -50,6 +50,10 @@ paths:
           name: exclude_fields
           schema:
             type: string
+        - in: query
+          name: tags
+          schema:
+            type: string
       responses:
         200:
           description: 'OK'
