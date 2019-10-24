@@ -29,6 +29,9 @@ from galaxy_api.api.v3.serializers import CollectionUploadSerializer
 from galaxy_api.common import pulp
 from galaxy_api.api import permissions, models
 
+import logging
+log = logging.getLogger(__name__)
+
 
 class CollectionViewSet(viewsets.GenericViewSet):
 
@@ -129,12 +132,18 @@ class CollectionArtifactUploadView(views.APIView):
         )
 
         post_params = self._prepare_post_params(data)
-        upload_response = api.request(
-            'POST',
-            url,
-            headers={'Content-Type': 'multipart/form-data'},
-            post_params=post_params,
-        )
+        try:
+            upload_response = api.request(
+                'POST',
+                url,
+                headers={'Content-Type': 'multipart/form-data'},
+                post_params=post_params,
+            )
+        except galaxy_pulp.ApiException:
+            log.exception('Failed to publish artifact %s (namespace=%s, sha256=%s) to pulp at url=%s',  # noqa
+                          data['file'].name, namespace, data.get('sha256'), url)
+            raise
+
         upload_response_data = json.loads(upload_response.data)
 
         task_detail = api.call_api(
@@ -144,6 +153,9 @@ class CollectionArtifactUploadView(views.APIView):
             response_type='CollectionImport',
             _return_http_data_only=True,
         )
+
+        log.info('Publishing of artifact %s to namespace=%s by user=%s created pulp import task_id=%s', # noqa
+                 data['file'].name, namespace, request.user, task_detail.id)
 
         models.CollectionImport.objects.create(
             task_id=task_detail.id,
