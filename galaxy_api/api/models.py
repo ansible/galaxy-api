@@ -1,5 +1,6 @@
 from django.db import models
 from django.db import transaction
+from django.urls import reverse
 
 from galaxy_api.auth import models as auth_models
 
@@ -99,3 +100,6 @@ class CollectionImport(models.Model):
 
     class Meta:
         ordering = ['-task_id']
+
+    def get_absolute_url(self):
+        return reverse('api:v3:collection-imports', args=[str(self.task_id)])

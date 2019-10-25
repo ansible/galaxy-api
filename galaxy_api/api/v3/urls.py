@@ -26,6 +26,7 @@ urlpatterns = [
     path(
         'imports/collections/<str:pk>/',
         viewsets.CollectionImportViewSet.as_view({'get': 'retrieve'}),
+        name='collection-imports',
     ),
     path(
         'artifacts/collections/',
