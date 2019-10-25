@@ -1,7 +1,7 @@
 import galaxy_pulp
 from django.conf import settings
 from django_filters import filters
-from django_filters.rest_framework import filterset, DjangoFilterBackend
+from django_filters.rest_framework import filterset, DjangoFilterBackend, OrderingFilter
 from rest_framework import viewsets
 from rest_framework.decorators import action as drf_action
 from rest_framework.exceptions import NotFound
@@ -178,6 +178,11 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
 
 class CollectionImportFilter(filterset.FilterSet):
     namespace = filters.CharFilter(field_name='namespace__name')
+    created = filters.DateFilter(field_name='created_at')
+
+    sort = OrderingFilter(
+        fields=(('created_at', 'created'),)
+    )
 
     class Meta:
         model = models.CollectionImport
@@ -190,6 +195,8 @@ class CollectionImportViewSet(viewsets.GenericViewSet):
 
     filter_backends = [DjangoFilterBackend]
     filterset_class = CollectionImportFilter
+
+    ordering_fields = ('created',)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
