@@ -162,6 +162,21 @@ paths:
             application/json:
               schema:
                 type: object
+    put:
+      operationId: "put"
+      tags: ["galaxy: collections"]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Collection'
+      responses:
+        200:
+          description: 'OK'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
 
   # Galaxy Collection Versions API
   "/{prefix}/v3/collections/{namespace}/{name}/versions/":
@@ -367,6 +382,16 @@ components:
           type: array
           items:
             type: object
+
+    Collection:
+      type: object
+      properties:
+        name:
+          type: string
+        namespace:
+          type: string
+        deprecated:
+          type: boolean
 
     CollectionImport:
       type: object

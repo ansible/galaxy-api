@@ -98,9 +98,6 @@ class CollectionViewSet(viewsets.GenericViewSet):
 
         return Response(data)
 
-    def set_deprecated(self):
-        pass
-
     @staticmethod
     def _query_namespaces(names):
         queryset = models.Namespace.objects.filter(name__in=names)

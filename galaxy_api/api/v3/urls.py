@@ -13,7 +13,7 @@ urlpatterns = [
     ),
     path(
         'collections/<str:namespace>/<str:name>/',
-        viewsets.CollectionViewSet.as_view({'get': 'retrieve'}),
+        viewsets.CollectionViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
     ),
     path(
         'collections/<str:namespace>/<str:name>/versions/',
