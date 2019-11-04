@@ -100,7 +100,6 @@ class TestCollectionViewSet(BaseTestCase):
                                     'name': 'nginx',
                                     'foo': 'bar'},
                               format='json',
-                              # content_type='application/json',
                               )
 
         assert response.status_code == 200
