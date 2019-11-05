@@ -1,0 +1,65 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+set -o pipefail
+
+GALAXY_CODE="${GALAXY_CODE}"
+
+_wait_for_tcp_port() {
+  local -r host="$1"
+  local -r port="$2"
+
+  local attempts=6
+  local timeout=1
+
+  echo "[debug]: Waiting for port tcp://${host}:${port}"
+  while [ $attempts -gt 0 ]; do
+    timeout 1 /bin/bash -c ">/dev/tcp/${host}/${port}" &>/dev/null && return 0 || :
+
+    echo "[debug]: Waiting ${timeout} seconds more..."
+    sleep $timeout
+
+    timeout=$(( $timeout * 2 ))
+    attempts=$(( $attempts - 1 ))
+  done
+
+  echo "[error]: Port tcp://${host}:${port} is not available"
+  return 1
+}
+
+_prepare_env() {
+  _wait_for_tcp_port ${GALAXY_DB_HOST:-postgres} ${GALAXY_DB_PORT:-5432}
+  django-admin migrate
+}
+
+cmd_start() {
+  _prepare_env
+  exec uwsgi --master \
+    --socket :8000 \
+    --module galaxy_api.wsgi:application \
+    --processes 4 \
+    --threads 2 \
+    --buffer-size 32768
+}
+
+cmd_manage() {
+  exec django-admin "$@"
+}
+
+main() {
+  case "$1" in
+    'start')
+      cmd_start
+      ;;
+    'manage')
+      cmd_manage "${@:2}"
+      ;;
+    *)
+      exec "$@"
+      ;;
+    esac
+}
+
+
+main "$@"
