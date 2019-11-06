@@ -61,8 +61,13 @@ class NamespaceViewSet(
 
 class MyNamespaceViewSet(NamespaceViewSet):
     def get_queryset(self):
-        # FIXME(cutwater): this view should aso return all the namespaces if
-        # the user is part of the partner engineering team. Don't know how
-        # we plan to handle that.
-        return models.Namespace.objects.filter(
+        # All namespaces for users in the partner-engineers groups
+
+        if permissions.IsPartnerEngineer.has_permission(self.request, self):
+            queryset = models.Namespace.objects.all()
+            return queryset
+
+        # Just the namespaces with groups the user is in
+        queryset = models.Namespace.objects.filter(
             groups__in=self.request.user.groups.all())
+        return queryset
