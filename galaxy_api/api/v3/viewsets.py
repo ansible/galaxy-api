@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import json
+import logging
 
 import requests
 from django.conf import settings
@@ -29,6 +30,8 @@ from galaxy_api.api.models import Namespace
 from galaxy_api.api.v3.serializers import CollectionSerializer, CollectionUploadSerializer
 from galaxy_api.common import pulp
 from galaxy_api.api import permissions, models
+
+log = logging.getLogger(__name__)
 
 
 class CollectionViewSet(viewsets.GenericViewSet):
