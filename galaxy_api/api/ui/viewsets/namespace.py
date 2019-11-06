@@ -63,7 +63,7 @@ class MyNamespaceViewSet(NamespaceViewSet):
     def get_queryset(self):
         # All namespaces for users in the partner-engineers groups
 
-        if permissions.IsPartnerEngineer.has_permission(self.request, self):
+        if permissions.IsPartnerEngineer().has_permission(self.request, self):
             queryset = models.Namespace.objects.all()
             return queryset
 
