@@ -1,4 +1,3 @@
-import base64
 from unittest import mock
 
 from rest_framework.test import APIClient
@@ -7,33 +6,10 @@ import galaxy_pulp
 from galaxy_api.auth import models as auth_models
 
 from .base import BaseTestCase, API_PREFIX
+from .x_rh_identity import user_x_rh_identity
 
 import logging
 log = logging.getLogger(__name__)
-
-
-def user_x_rh_identity(username):
-    title_username = username.title()
-    token_json = """{
-        "entitlements":
-            {"insights":
-                {"is_entitled": true}
-            },
-        "identity":
-            {"account_number": "12345",
-            "user":
-                {"username": "%(username)s",
-                "email": "%(username)s@example.invalid",
-                "first_name": "%(title_username)s",
-                "last_name": "%(title_username)sington"
-                },
-            "internal": {"org_id": "54321"}
-            }
-            }""" % {'username': username, 'title_username': title_username}
-
-    token_b64 = base64.b64encode(token_json.encode())
-
-    return token_b64
 
 
 class TestCollectionViewSet(BaseTestCase):

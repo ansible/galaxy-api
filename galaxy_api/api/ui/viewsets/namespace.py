@@ -42,7 +42,7 @@ class NamespaceViewSet(
 ):
     lookup_field = "name"
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [
-        permissions.IsNamespaceOwnerOrReadOnly
+        permissions.IsNamespaceOwnerOrPartnerEngineer,
     ]
 
     filter_backends = (DjangoFilterBackend,)
