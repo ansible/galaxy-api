@@ -35,7 +35,6 @@ class ContentSerializer(serializers.Serializer):
 
 
 class CollectionVersionSummarySerializer(serializers.Serializer):
-    id = serializers.UUIDField()
     version = serializers.CharField()
     created = serializers.CharField()
 
@@ -60,9 +59,12 @@ class CollectionMetadataSerializer(serializers.Serializer):
 
 
 class CollectionVersionBaseSerializer(serializers.Serializer):
+    id = serializers.UUIDField()
     namespace = serializers.CharField()
     name = serializers.CharField()
     version = serializers.CharField()
+    certification = serializers.ChoiceField(
+        ['certified', 'not_certified', 'needs_review'])
 
     created_at = serializers.DateTimeField(source='pulp_created')
 
@@ -91,8 +93,7 @@ class _CollectionSerializer(serializers.Serializer):
     name = serializers.CharField()
     download_count = serializers.IntegerField(default=0)
     latest_version = CollectionVersionSerializer(source='*')
-    certification = serializers.ChoiceField(
-        ['certified', 'not_certified', 'needs_review'])
+    deprecated = serializers.BooleanField()
 
     def _get_namespace(self, obj):
         raise NotImplementedError

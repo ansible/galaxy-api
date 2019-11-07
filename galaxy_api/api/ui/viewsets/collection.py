@@ -12,6 +12,7 @@ from rest_framework.settings import api_settings
 from galaxy_api.api import models, permissions
 from galaxy_api.api.ui import serializers
 from galaxy_api.common import pulp
+from galaxy_api import constants
 
 from galaxy_pulp.models import CertificationInfo
 
@@ -39,7 +40,6 @@ class CollectionViewSet(viewsets.GenericViewSet):
 
         response = api.list(
             is_highest=True,
-            certification='certified',
             exclude_fields='docs_blob',
             **params
         )
@@ -70,6 +70,7 @@ class CollectionViewSet(viewsets.GenericViewSet):
 
         if version == '':
             params['is_highest'] = True
+            params['certification'] = constants.CertificationStatus.CERTIFIED.value
         else:
             params['version'] = version
 
@@ -81,9 +82,8 @@ class CollectionViewSet(viewsets.GenericViewSet):
         all_versions = api.list(
             namespace=namespace,
             name=name,
-            is_highest=True,
-            certification='certified',
-            fields='version,id,pulp_created,artifact'
+            fields='version,id,pulp_created,artifact',
+            certification=constants.CertificationStatus.CERTIFIED.value
         )
 
         all_versions = [
@@ -112,12 +112,9 @@ class CollectionViewSet(viewsets.GenericViewSet):
 
 class CollectionVersionViewSet(viewsets.GenericViewSet):
     lookup_url_kwarg = 'version'
-    lookup_value_regex = r'[0-9A-Za-z.+-]+'
-    serializer_class = serializers.CollectionVersionSerializer
+    lookup_value_regex = r'[0-9a-z_]+/[0-9a-z_]+/[0-9A-Za-z.+-]+'
 
     def list(self, request, *args, **kwargs):
-        namespace, name = self.kwargs['collection'].split('/')
-
         self.paginator.init_from_request(request)
 
         params = self.request.query_params.dict()
@@ -126,18 +123,19 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
             'limit': self.paginator.limit,
         })
 
+        # pulp uses ordering, but the UI is standardized around sort
+        if params.get('sort'):
+            params['ordering'] = params.get('sort')
+            del params['sort']
+
         api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
-        response = api.list(namespace=namespace, name=name, **params)
+        response = api.list(exclude_fields='docs_blob', **params)
 
-        if response.count == 0:
-            raise NotFound()
-
-        data = serializers.CollectionVersionBaseSerializer(response.results, many=True).data
+        data = serializers.CollectionVersionSerializer(response.results, many=True).data
         return self.paginator.paginate_proxy_response(data, response.count)
 
     def retrieve(self, request, *args, **kwargs):
-        namespace, name = self.kwargs['collection'].split('/')
-        version = self.kwargs['version']
+        namespace, name, version = self.kwargs['version'].split('/')
 
         api = galaxy_pulp.PulpCollectionsApi(pulp.get_client())
         response = api.list(namespace=namespace, name=name, version=version, limit=1)
@@ -158,8 +156,7 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
         serializer_class=serializers.CertificationSerializer
     )
     def set_certified(self, request, *args, **kwargs):
-        namespace, name = self.kwargs['collection'].split('/')
-        version = self.kwargs['version']
+        namespace, name, version = self.kwargs['version'].split('/')
         namespace_obj = get_object_or_404(models.Namespace, name=namespace)
         self.check_object_permissions(request, namespace_obj)
 

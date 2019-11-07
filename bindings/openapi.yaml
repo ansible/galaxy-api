@@ -58,6 +58,15 @@ paths:
           name: certification
           schema:
             type: string
+        - in: query
+          name: ordering
+          schema:
+            type: string
+        - in: query
+          name: deprecated
+          schema:
+            type: boolean
+
       responses:
         200:
           description: 'OK'

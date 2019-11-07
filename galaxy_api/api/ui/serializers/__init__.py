@@ -15,6 +15,10 @@ from .namespace import (
     NamespaceSummarySerializer
 )
 
+from .current_user import (
+    CurrentUserSerializer
+)
+
 
 __all__ = (
     'CollectionDetailSerializer',
@@ -26,5 +30,6 @@ __all__ = (
     'ImportTaskDetailSerializer',
     'ImportTaskListSerializer',
     'NamespaceSerializer',
-    'NamespaceSummarySerializer'
+    'NamespaceSummarySerializer',
+    'CurrentUserSerializer'
 )
