@@ -221,6 +221,10 @@ paths:
           name: limit
           schema:
             type: integer
+        - in: query
+          name: certification
+          schema:
+            type: string
       responses:
         200:
           description: 'OK'

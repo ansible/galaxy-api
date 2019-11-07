@@ -30,6 +30,7 @@ from galaxy_api.api.models import Namespace
 from galaxy_api.api.v3.serializers import CollectionSerializer, CollectionUploadSerializer
 from galaxy_api.common import pulp
 from galaxy_api.api import permissions, models
+from galaxy_api import constants
 
 log = logging.getLogger(__name__)
 
@@ -98,6 +99,7 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
         params.update({
             'offset': self.paginator.offset,
             'limit': self.paginator.limit,
+            'certification': constants.CertificationStatus.CERTIFIED.value
         })
 
         api = galaxy_pulp.GalaxyCollectionVersionsApi(pulp.get_client())

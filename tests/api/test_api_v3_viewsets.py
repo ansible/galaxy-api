@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 import galaxy_pulp
 
 from galaxy_api.auth import models as auth_models
+from galaxy_api import constants
 
 from .base import BaseTestCase, API_PREFIX
 from .x_rh_identity import user_x_rh_identity
@@ -162,7 +163,12 @@ class TestCollectionVersionViewSet(BaseTestCase):
 
         assert response.status_code == 404
         self.versions_api.list.assert_called_once_with(
-            prefix=API_PREFIX, namespace="ansible", name="nginx", limit=10, offset=0
+            prefix=API_PREFIX,
+            namespace="ansible",
+            name="nginx",
+            limit=10,
+            offset=0,
+            certification=constants.CertificationStatus.CERTIFIED.value
         )
 
     def test_list(self):
@@ -175,7 +181,12 @@ class TestCollectionVersionViewSet(BaseTestCase):
 
         assert response.status_code == 200
         self.versions_api.list.assert_called_once_with(
-            prefix=API_PREFIX, namespace="ansible", name="nginx", limit=10, offset=0
+            prefix=API_PREFIX,
+            namespace="ansible",
+            name="nginx",
+            limit=10,
+            offset=0,
+            certification=constants.CertificationStatus.CERTIFIED.value
         )
 
     def test_list_limit_offset(self):
@@ -189,7 +200,12 @@ class TestCollectionVersionViewSet(BaseTestCase):
 
         assert response.status_code == 200
         self.versions_api.list.assert_called_once_with(
-            prefix=API_PREFIX, namespace="ansible", name="nginx", limit=10, offset=20
+            prefix=API_PREFIX,
+            namespace="ansible",
+            name="nginx",
+            limit=10,
+            offset=20,
+            certification=constants.CertificationStatus.CERTIFIED.value
         )
 
     def test_list_limit_offset_empty(self):
@@ -203,7 +219,12 @@ class TestCollectionVersionViewSet(BaseTestCase):
 
         assert response.status_code == 404
         self.versions_api.list.assert_called_once_with(
-            prefix=API_PREFIX, namespace="ansible", name="nginx", limit=10, offset=20
+            prefix=API_PREFIX,
+            namespace="ansible",
+            name="nginx",
+            limit=10,
+            offset=20,
+            certification=constants.CertificationStatus.CERTIFIED.value
         )
 
     def test_retrieve(self):
