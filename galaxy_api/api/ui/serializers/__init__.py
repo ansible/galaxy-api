@@ -2,6 +2,7 @@ from .collection import (
     CollectionDetailSerializer,
     CollectionListSerializer,
     CollectionVersionSerializer,
+    CertificationSerializer,
     CollectionVersionDetailSerializer,
     CollectionVersionBaseSerializer,
 )
@@ -19,6 +20,7 @@ __all__ = (
     'CollectionDetailSerializer',
     'CollectionListSerializer',
     'CollectionVersionSerializer',
+    'CertificationSerializer',
     'CollectionVersionDetailSerializer',
     'CollectionVersionBaseSerializer',
     'ImportTaskDetailSerializer',

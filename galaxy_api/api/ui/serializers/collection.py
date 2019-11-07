@@ -70,6 +70,15 @@ class CollectionVersionBaseSerializer(serializers.Serializer):
 class CollectionVersionSerializer(CollectionVersionBaseSerializer):
     metadata = CollectionMetadataSerializer(source='*')
     contents = serializers.ListField(ContentSerializer())
+    certification = serializers.ChoiceField(
+            ['certified', 'not_certified', 'needs_review'],
+            required=True
+    )
+
+
+class CertificationSerializer(serializers.Serializer):
+    certification = serializers.ChoiceField(
+        ['certified', 'not_certified', 'needs_review'])
 
 
 class CollectionVersionDetailSerializer(CollectionVersionSerializer):

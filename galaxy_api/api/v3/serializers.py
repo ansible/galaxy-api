@@ -6,10 +6,8 @@ from galaxy_api.api.utils import parse_collection_filename
 
 
 class CollectionSerializer(serializers.Serializer):
-
     name = serializers.CharField(required=True)
     namespace = serializers.CharField(required=True)
-
     deprecated = serializers.BooleanField(required=False)
 
 

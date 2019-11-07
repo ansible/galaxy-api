@@ -13,6 +13,8 @@ from galaxy_api.api import models, permissions
 from galaxy_api.api.ui import serializers
 from galaxy_api.common import pulp
 
+from galaxy_pulp.models import CertificationInfo
+
 
 class CollectionViewSet(viewsets.GenericViewSet):
     lookup_url_kwarg = 'collection'
@@ -37,6 +39,7 @@ class CollectionViewSet(viewsets.GenericViewSet):
 
         response = api.list(
             is_highest=True,
+            certification='certified',
             exclude_fields='docs_blob',
             **params
         )
@@ -78,6 +81,8 @@ class CollectionViewSet(viewsets.GenericViewSet):
         all_versions = api.list(
             namespace=namespace,
             name=name,
+            is_highest=True,
+            certification='certified',
             fields='version,id,pulp_created,artifact'
         )
 
@@ -108,6 +113,7 @@ class CollectionViewSet(viewsets.GenericViewSet):
 class CollectionVersionViewSet(viewsets.GenericViewSet):
     lookup_url_kwarg = 'version'
     lookup_value_regex = r'[0-9A-Za-z.+-]+'
+    serializer_class = serializers.CollectionVersionSerializer
 
     def list(self, request, *args, **kwargs):
         namespace, name = self.kwargs['collection'].split('/')
@@ -143,32 +149,33 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
         return Response(data)
 
     @drf_action(
-        methods=["PUT", "DELETE"],
+        methods=["PUT"],
         detail=True,
         url_path="certified",
         permission_classes=api_settings.DEFAULT_PERMISSION_CLASSES + [
             permissions.IsPartnerEngineer
         ],
+        serializer_class=serializers.CertificationSerializer
     )
     def set_certified(self, request, *args, **kwargs):
         namespace, name = self.kwargs['collection'].split('/')
         version = self.kwargs['version']
-
         namespace_obj = get_object_or_404(models.Namespace, name=namespace)
         self.check_object_permissions(request, namespace_obj)
 
         api = galaxy_pulp.GalaxyCollectionVersionsApi(pulp.get_client())
+        serializer = serializers.CertificationSerializer(
+            data=request.data,
+            context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        certification = serializer.validated_data.get('certification')
 
-        if self.request.method == "PUT":
-            api_method = api.set_certified
-        else:
-            api_method = api.unset_certified
-
-        response = api_method(
+        response = api.set_certified(
             prefix=settings.API_PATH_PREFIX,
             namespace=namespace,
             name=name,
             version=version,
+            certification_info=CertificationInfo(certification),
         )
         return Response(response)
 

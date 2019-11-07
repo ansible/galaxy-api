@@ -54,6 +54,10 @@ paths:
           name: tags
           schema:
             type: string
+        - in: query
+          name: certification
+          schema:
+            type: string
       responses:
         200:
           description: 'OK'
@@ -274,16 +278,12 @@ paths:
     put:
       operationId: "set_certified"
       tags: ["galaxy: collection versions"]
-      responses:
-        200:
-          description: "OK"
-          content:
-            application/json:
-              schema:
-                type: object
-    delete:
-      operationId: "unset_certified"
-      tags: ["galaxy: collection versions"]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CertificationInfo'
       responses:
         200:
           description: "OK"
@@ -417,3 +417,11 @@ components:
         messages:
           type: array
           items: {}
+
+    CertificationInfo:
+      type: object
+      required:
+        - certification
+      properties:
+        certification:
+          type: string
