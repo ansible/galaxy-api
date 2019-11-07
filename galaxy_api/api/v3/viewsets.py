@@ -154,11 +154,11 @@ class CollectionArtifactUploadView(views.APIView):
             )
 
         self.check_object_permissions(request, namespace)
-
         api = pulp.get_client()
-        url = '{host}/{prefix}{path}'.format(
+        url = '{host}/{prefix}/{path}'.format(
             host=api.configuration.host,
-            path='ansible/collections/',
+            path='v3/artifacts/collections/',
+            prefix=settings.API_PATH_PREFIX
         )
         headers = {}
         headers.update(api.default_headers)
