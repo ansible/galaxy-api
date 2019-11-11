@@ -19,6 +19,7 @@ ENV PATH="/venv/bin:$PATH" \
     LANG=en_US.UTF-8 \
     GALAXY_CODE=/code \
     GALAXY_VENV=/venv \
+    GALAXY_STATIC_ROOT=/static \
     DJANGO_SETTINGS_MODULE=galaxy_api.settings
 
 RUN useradd \
@@ -51,6 +52,9 @@ RUN python3.6 -m venv "${GALAXY_VENV}" \
     && popd \
     && pip install -e /code/galaxy-api \
     && pip install -e /code/galaxy-pulp
+
+RUN mkdir "$GALAXY_STATIC_ROOT" \
+    && GALAXY_SECRET_KEY=x django-admin collectstatic --noinput
 
 COPY --chown=galaxy:root \
     scripts/entrypoint \
