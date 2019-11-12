@@ -49,4 +49,5 @@ class IsNamespaceOwnerOrPartnerEngineer(BasePermission):
     def has_object_permission(self, request, view, obj):
         if IsPartnerEngineer().has_permission(request, view):
             return True
-        return IsNamespaceOwner().has_object_permission(request, view, obj)
+        return IsNamespaceOwnerOrReadOnly().has_object_permission(
+            request, view, obj)
