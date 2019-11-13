@@ -15,7 +15,6 @@ settings = LazySettings(
 # ---------------------------------------------------------
 # Django settings
 # ---------------------------------------------------------
-
 ALLOWED_HOSTS = ['*']
 
 # Application definition
@@ -136,6 +135,32 @@ PULP_API_PASSWORD = 'admin'
 PULP_CONTENT_HOST = 'pulp-content-app'
 PULP_CONTENT_PORT = 24816
 PULP_CONTENT_PATH_PREFIX = '/api/automation-hub/v3/artifacts/collections/'
+
+# ---------------------------------------------------------
+# Application settings
+# ---------------------------------------------------------
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'default': {
+            'format': '%(asctime)s %(levelname)s %(name)s: %(message)s',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'default',
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+        },
+    }
+}
 
 ################################################################################
 #                                   FOOTER                                     #
