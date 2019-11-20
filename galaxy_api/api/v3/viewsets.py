@@ -13,6 +13,7 @@
 # limitations under the License.
 import json
 import logging
+from urllib import parse as urlparse
 
 import requests
 from django.conf import settings
@@ -124,8 +125,16 @@ class CollectionVersionViewSet(viewsets.GenericViewSet):
             name=self.kwargs['name'],
             version=self.kwargs['version'],
         )
-        response['download_url'] = request.build_absolute_uri(response['download_url'])
+        response['download_url'] = self._transform_pulp_url(request, response['download_url'])
         return Response(response)
+
+    @staticmethod
+    def _transform_pulp_url(request, pulp_url):
+        """Translate URL returned by Pulp."""
+        urlparts = urlparse.urlsplit(pulp_url)
+        # Build relative URL by stripping scheme and netloc
+        relative_url = urlparse.urlunsplit(('', '') + urlparts[2:])
+        return request.build_absolute_uri(relative_url)
 
 
 class CollectionImportViewSet(viewsets.ViewSet):
