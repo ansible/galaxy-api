@@ -35,6 +35,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'request_id.middleware.RequestIdMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -136,9 +138,28 @@ PULP_CONTENT_HOST = 'pulp-content-app'
 PULP_CONTENT_PORT = 24816
 PULP_CONTENT_PATH_PREFIX = '/api/automation-hub/v3/artifacts/collections/'
 
+# CLOUD_WATCH_LOGGER = {
+#     'AWS_ACCESS_KEY_ID': '',
+#     'AWS_SECRET_ACCESS_KEY': '',
+#     'AWS_REGION_NAME': '',
+#     'LOGGING_GROUP': '',
+#     'LOGGING_STREAM_NAME': ''
+# }
+
 # ---------------------------------------------------------
-# Application settings
+# Logging settings
 # ---------------------------------------------------------
+
+# CloudWatch logging example:
+# LOGGING = {
+#     ...
+#     'handlers': {
+#         'cloudwatch': {
+#             'class': 'galaxy_api.contrib.logging.CloudWatchHandler',
+#         },
+#     }
+#     ...
+# }
 
 LOGGING = {
     'version': 1,
@@ -150,13 +171,21 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'default',
-        }
+        },
+    },
+    'root': {
+        'level': 'WARNING',
+        'handlers': ['console'],
     },
     'loggers': {
         'django': {
+            # NOTE: Override django built-in handler.
+            'propagate': True,
+        },
+        'django.server': {
+            'level': 'INFO',
             'handlers': ['console'],
         },
     }

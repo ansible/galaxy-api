@@ -12,6 +12,10 @@ requests = "*"
 pulpcore-client = "*"
 pulp-ansible-client = "*"
 django-filter = "*"
+boto3 = "*"
+watchtower = "*"
+logstash-formatter = "*"
+django-request-id = "*"
 
 [dev-packages]
 flake8 = "*"
