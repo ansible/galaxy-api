@@ -7,8 +7,8 @@ from dynaconf import LazySettings
 
 # --- BEGIN OF DYNACONF HEADER ---
 settings = LazySettings(
-    GLOBAL_ENV_FOR_DYNACONF='GALAXY',
-
+    ENVVAR_PREFIX_FOR_DYNACONF='GALAXY',
+    ENVVAR_FOR_DYNACONF='GALAXY_SETTINGS',
 )
 # --- END OF DYNACONF HEADER ---
 

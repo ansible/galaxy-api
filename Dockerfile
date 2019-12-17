@@ -20,6 +20,7 @@ ENV PATH="/venv/bin:$PATH" \
     GALAXY_CODE=/code \
     GALAXY_VENV=/venv \
     GALAXY_STATIC_ROOT=/static \
+    GALAXY_SETTINGS=/etc/galaxy/settings.py \
     DJANGO_SETTINGS_MODULE=galaxy_api.settings
 
 RUN useradd \
