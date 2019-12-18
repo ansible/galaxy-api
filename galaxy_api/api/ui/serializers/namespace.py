@@ -1,8 +1,9 @@
 from django.db import transaction
 
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, SlugRelatedField
 
 from galaxy_api.api import models
+from galaxy_api.auth import models as auth_models
 
 
 class NamespaceLinkSerializer(ModelSerializer):
@@ -12,7 +13,12 @@ class NamespaceLinkSerializer(ModelSerializer):
 
 
 class NamespaceSerializer(ModelSerializer):
-    links = NamespaceLinkSerializer(many=True)
+    links = NamespaceLinkSerializer(many=True, required=False)
+    groups = SlugRelatedField(
+            many=True,
+            slug_field='name',
+            queryset=auth_models.Group.objects.all()
+    )
 
     class Meta:
         model = models.Namespace
@@ -24,9 +30,9 @@ class NamespaceSerializer(ModelSerializer):
             'avatar_url',
             'description',
             'links',
+            'groups',
             'resources'
         )
-        read_only_fields = ('name', )
 
     @transaction.atomic
     def update(self, instance, validated_data):
@@ -40,10 +46,30 @@ class NamespaceSerializer(ModelSerializer):
         return instance
 
 
-class NamespaceSummarySerializer(NamespaceSerializer):
-    '''NamespaceSerializer but without 'links' or 'resources'
+class NamespaceUpdateSerializer(NamespaceSerializer):
+    """NamespaceSerializer but read_only 'name'."""
 
-    For use in _ui/collection detail views.'''
+    class Meta:
+        model = models.Namespace
+        fields = (
+            'id',
+            'name',
+            'company',
+            'email',
+            'avatar_url',
+            'description',
+            'links',
+            'groups',
+            'resources'
+        )
+
+        read_only_fields = ('name', )
+
+
+class NamespaceSummarySerializer(NamespaceSerializer):
+    """NamespaceSerializer but without 'links' or 'resources'.
+
+    For use in _ui/collection detail views."""
 
     class Meta:
         model = models.Namespace

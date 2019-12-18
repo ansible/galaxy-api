@@ -37,6 +37,7 @@ class NamespaceFilter(filterset.FilterSet):
 class NamespaceViewSet(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
     viewsets.GenericViewSet,
 ):
@@ -52,6 +53,8 @@ class NamespaceViewSet(
     def get_serializer_class(self):
         if self.action == 'list':
             return serializers.NamespaceSummarySerializer
+        elif self.action == 'update':
+            return serializers.NamespaceUpdateSerializer
         else:
             return serializers.NamespaceSerializer
 

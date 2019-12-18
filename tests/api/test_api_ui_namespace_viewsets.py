@@ -1,3 +1,4 @@
+import json
 import logging
 
 from django.urls import reverse
@@ -67,6 +68,68 @@ class TestUiNamespaceViewSet(BaseTestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['data'][0]['name'], 'some_namespace')
+
+    def test_post_namespace(self):
+        username = 'saruman'
+        username_token_b64 = user_x_rh_identity(username, account_number="999")
+        some_namespace_member = auth_models.User.objects.create(username=username)
+        client = APIClient()
+        client.credentials(**{"HTTP_X_RH_IDENTITY": username_token_b64})
+
+        namespace_group_name = permissions.IsPartnerEngineer.GROUP_NAME
+        namespace_group = auth_models.Group.objects.create(name=namespace_group_name)
+        namespace_group.user_set.add(*[some_namespace_member])
+
+        url = reverse('api:ui:namespaces-list')
+        payload = {'name': 'mordor',
+                   'company': 'coolring',
+                   'email': 'saru@man.me',
+                   'description': 'isengard',
+                   'groups': ['system:partner-engineers']}
+
+        response = client.post(url, format='json', data=payload)
+        log.debug('%s', response.content)
+        log.debug('%s', response.status_code)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_put_namespace(self):
+        username = 'saruman'
+        username_token_b64 = user_x_rh_identity(username, account_number="999")
+        some_namespace_member = auth_models.User.objects.create(username=username)
+        client = APIClient()
+        client.credentials(**{"HTTP_X_RH_IDENTITY": username_token_b64})
+
+        namespace_group_name = permissions.IsPartnerEngineer.GROUP_NAME
+        namespace_group = auth_models.Group.objects.create(name=namespace_group_name)
+        namespace_group.user_set.add(*[some_namespace_member])
+
+        # create
+        url = reverse('api:ui:namespaces-list')
+        payload = {'name': 'mordor',
+                   'company': 'coolring',
+                   'email': 'saru@man.me',
+                   'description': 'isengard',
+                   'groups': ['system:partner-engineers']}
+        client.post(url, format='json', data=payload)
+
+        # update
+        url += 'mordor/'
+        log.debug('%s', url)
+        payload = {'name': 'mandarin',
+                   'email': 'saru@man.me',
+                   'description': 'lemonade',
+                   'groups': ['system:partner-engineers']}
+
+        response = client.put(url, format='json', data=payload)
+        response_data = json.loads(response.content.decode('utf-8'))
+        log.debug('%s', response.content)
+        log.debug('%s', response.status_code)
+
+        self.assertEqual(response_data['name'], 'mordor')
+        self.assertEqual(response_data['description'], 'lemonade')
+        self.assertEqual(response_data['company'], 'coolring')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # TODO: test get detail, put/update detail, put/update detail for partner-engineers, etc
 
