@@ -11,6 +11,9 @@ urlpatterns = [
     path(f'{api_prefix}/', include('galaxy_api.api.urls', namespace='api')),
 
     path('admin/', admin.site.urls),
+
+    # provides /metrics for prometheus
+    path('', include('django_prometheus.urls')),
 ]
 
 # Serve static files for admin site

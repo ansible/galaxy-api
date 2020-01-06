@@ -37,6 +37,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'request_id.middleware.RequestIdMiddleware',
 
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -44,7 +45,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 ROOT_URLCONF = 'galaxy_api.urls'
@@ -74,7 +75,8 @@ WSGI_APPLICATION = 'galaxy_api.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        # Gather metrics for 'django.db.backends.postgresql',
+        'ENGINE': 'django_prometheus.db.backends.postgresql',
         'NAME': settings.get('DB_NAME', 'galaxy'),
         'USER': settings.get('DB_USER', 'galaxy'),
         'PASSWORD': settings.get('DB_PASSWORD', ''),
@@ -138,28 +140,9 @@ PULP_CONTENT_HOST = 'pulp-content-app'
 PULP_CONTENT_PORT = 24816
 PULP_CONTENT_PATH_PREFIX = '/api/automation-hub/v3/artifacts/collections/'
 
-# CLOUD_WATCH_LOGGER = {
-#     'AWS_ACCESS_KEY_ID': '',
-#     'AWS_SECRET_ACCESS_KEY': '',
-#     'AWS_REGION_NAME': '',
-#     'LOGGING_GROUP': '',
-#     'LOGGING_STREAM_NAME': ''
-# }
-
 # ---------------------------------------------------------
-# Logging settings
+# Application settings
 # ---------------------------------------------------------
-
-# CloudWatch logging example:
-# LOGGING = {
-#     ...
-#     'handlers': {
-#         'cloudwatch': {
-#             'class': 'galaxy_api.contrib.logging.CloudWatchHandler',
-#         },
-#     }
-#     ...
-# }
 
 LOGGING = {
     'version': 1,
@@ -171,21 +154,13 @@ LOGGING = {
     },
     'handlers': {
         'console': {
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'default',
-        },
-    },
-    'root': {
-        'level': 'WARNING',
-        'handlers': ['console'],
+        }
     },
     'loggers': {
         'django': {
-            # NOTE: Override django built-in handler.
-            'propagate': True,
-        },
-        'django.server': {
-            'level': 'INFO',
             'handlers': ['console'],
         },
     }
