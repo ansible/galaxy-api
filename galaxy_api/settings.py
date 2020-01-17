@@ -35,9 +35,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'request_id.middleware.RequestIdMiddleware',
-
     'django_prometheus.middleware.PrometheusBeforeMiddleware',
+    'request_id.middleware.RequestIdMiddleware',
+    'galaxy_api.contrib.logging.RequestLogMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

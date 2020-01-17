@@ -1,5 +1,7 @@
 """Logging utils."""
 
+import logging
+
 import boto3
 import watchtower
 import logstash_formatter
@@ -24,3 +26,51 @@ class CloudWatchHandler(watchtower.CloudWatchLogHandler):
         )
         self.addFilter(request_id.logging.RequestIdFilter())
         self.setFormatter(logstash_formatter.LogstashFormatterV1())
+
+
+class RequestLogMiddleware:
+    """Logs django requests."""
+
+    LOGGER_NAME = "galaxy_api.request"
+    META_FIELDS = [
+        'HTTP_REFERRER',
+        'HTTP_USER_AGENT',
+        'HTTP_X_FORWARDED_FOR',
+        'HTTP_X_FORWARDED_HOST',
+        'HTTP_X_FORWARDED_SERVER',
+        'QUERY_STRING',
+        'REMOTE_ADDR',
+    ]
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.logger = logging.getLogger(self.LOGGER_NAME)
+
+    def __call__(self, request):
+        args = {
+            'method': request.method,
+            'path': request.path,
+            'full_path': request.get_full_path(),
+            'client_addr': get_remote_ip(request),
+        }
+
+        for field in self.META_FIELDS:
+            args[field.lower()] = request.META.get(field, '')
+
+        response = self.get_response(request)
+
+        args['status_code'] = response.status_code
+
+        message = "{method} {path} {status_code}".format(**args)
+
+        self.logger.info(message, extra=args)
+
+        return response
+
+
+def get_remote_ip(request):
+    forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if forwarded_for:
+        return forwarded_for.split(',')[0]
+    else:
+        return request.META.get('REMOTE_ADDR')
