@@ -1,5 +1,6 @@
 from django.contrib.auth import models as auth_models
 
+from django_prometheus.models import ExportModelOperationsMixin
 
 __all__ = (
     'SYSTEM_SCOPE',
@@ -11,12 +12,12 @@ __all__ = (
 SYSTEM_SCOPE = 'system'
 
 
-class User(auth_models.AbstractUser):
+class User(ExportModelOperationsMixin('user'), auth_models.AbstractUser):
     """Custom user model."""
     pass
 
 
-class GroupManager(auth_models.GroupManager):
+class GroupManager(ExportModelOperationsMixin('groupmanager'), auth_models.GroupManager):
     def create_identity(self, scope, name):
         return super().create(name=self._make_name(scope, name))
 
@@ -28,7 +29,7 @@ class GroupManager(auth_models.GroupManager):
         return f'{scope}:{name}'
 
 
-class Group(auth_models.Group):
+class Group(ExportModelOperationsMixin('group'), auth_models.Group):
     objects = GroupManager()
 
     class Meta:

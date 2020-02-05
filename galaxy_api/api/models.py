@@ -2,13 +2,15 @@ from django.db import models
 from django.db import transaction
 from django.urls import reverse
 
+from django_prometheus.models import ExportModelOperationsMixin
+
 from galaxy_api.auth import models as auth_models
 
 
 __all__ = ("Namespace", "NamespaceLink")
 
 
-class Namespace(models.Model):
+class Namespace(ExportModelOperationsMixin('namespace'), models.Model):
     """
     A model representing Ansible content namespace.
 
@@ -52,7 +54,7 @@ class Namespace(models.Model):
         )
 
 
-class NamespaceLink(models.Model):
+class NamespaceLink(ExportModelOperationsMixin('namespacelink'), models.Model):
     """
     A model representing a Namespace link.
 
@@ -77,7 +79,7 @@ class NamespaceLink(models.Model):
         return self.name
 
 
-class CollectionImport(models.Model):
+class CollectionImport(ExportModelOperationsMixin('collectionimport'), models.Model):
     """
     A model representing a mapping between pulp task id and task parameters.
 
