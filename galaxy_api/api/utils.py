@@ -34,12 +34,14 @@ def parse_collection_filename(filename):
     match = FILENAME_REGEXP.match(filename)
 
     if not match:
-        raise ValueError("Invalid filename. Expected: {namespace}-{name}-{version}.tar.gz")
+        msg = "Invalid filename {filename}. Expected format: {namespace}-{name}-{version}.tar.gz"
+        raise ValueError(msg.format(filename=filename))
 
     namespace, name, version = match.groups()
 
     match = VERSION_REGEXP.match(version)
     if not match:
-        raise ValueError("Invalid version string. Expected semantic version format.")
+        msg = "Invalid version string {version} from filename {filename}. Expected semantic version format." # noqa
+        raise ValueError(msg.format(version=version, filename=filename))
 
     return CollectionFilename(namespace, name, version)
