@@ -75,6 +75,28 @@ class NamespaceViewSet(
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def update(self, request, *args, **kwargs):
+        for account in request.data['groups']:
+            if account == RH_PE_ACCOUNT_SCOPE:
+                continue
+            scope, account_id = account.split(':')
+            if account_id.isdigit():
+                group, _ = auth_models.Group.objects.get_or_create_identity(
+                        scope, account_id)
+            else:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        if RH_PE_ACCOUNT_SCOPE not in request.data['groups']:
+            request.data['groups'].append(RH_PE_ACCOUNT_SCOPE)
+        instance = self.get_object()
+        serializer = serializers.NamespaceUpdateSerializer(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return Response(serializer.data)
+
+    def perform_update(self, serializer):
+        serializer.save()
+
     def get_serializer_class(self):
         if self.action == 'list':
             return serializers.NamespaceSummarySerializer
