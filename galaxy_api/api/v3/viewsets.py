@@ -30,6 +30,7 @@ from rest_framework.settings import api_settings
 from galaxy_api.api.models import Namespace
 from galaxy_api.api.v3.serializers import CollectionSerializer, CollectionUploadSerializer
 from galaxy_api.common import pulp
+from galaxy_api.common import metrics
 from galaxy_api.api import permissions, models
 from galaxy_api import constants
 
@@ -151,6 +152,7 @@ class CollectionArtifactUploadView(views.APIView):
     ]
 
     def post(self, request, *args, **kwargs):
+        metrics.collection_import_attempts.inc()
         serializer = CollectionUploadSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
@@ -211,6 +213,7 @@ class CollectionArtifactUploadView(views.APIView):
             version=data['filename'].version,
         )
 
+        metrics.collection_import_successes.inc()
         return Response(data=upload_response_data, status=upload_response.status)
 
     @staticmethod
@@ -229,6 +232,8 @@ class CollectionArtifactUploadView(views.APIView):
 
 class CollectionArtifactDownloadView(views.APIView):
     def get(self, request, *args, **kwargs):
+        metrics.collection_artifact_download_attempts.inc()
+
         # NOTE(cutwater): Using urllib3 because it's already a dependency of pulp_galaxy
         url = 'http://{host}:{port}/{prefix}/automation-hub/{filename}'.format(
             host=settings.PULP_CONTENT_HOST,
@@ -239,16 +244,20 @@ class CollectionArtifactDownloadView(views.APIView):
         response = requests.get(url, stream=True, allow_redirects=False)
 
         if response.status_code == requests.codes.not_found:
+            metrics.collection_artifact_download_failures.labels(status=requests.codes.not_found).inc() # noqa
             raise NotFound()
 
         if response.status_code == requests.codes.found:
             return HttpResponseRedirect(response.headers['Location'])
 
         if response.status_code == requests.codes.ok:
+            metrics.collection_artifact_download_successes.inc()
+
             return StreamingHttpResponse(
                 response.iter_content(chunk_size=4096),
                 content_type=response.headers['Content-Type']
             )
 
+        metrics.collection_artifact_download_failures.labels(status=response.status_code).inc()
         raise APIException('Unexpected response from content app. '
                            f'Code: {response.status_code}.')
