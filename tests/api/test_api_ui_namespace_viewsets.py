@@ -86,12 +86,46 @@ class TestUiNamespaceViewSet(BaseTestCase):
                    'email': 'saru@man.me',
                    'description': 'isengard',
                    'groups': ['system:partner-engineers']}
-
         response = client.post(url, format='json', data=payload)
         log.debug('%s', response.content)
         log.debug('%s', response.status_code)
 
+        # namespace with owner id to assign
+        payload_group = {'name': 'banana',
+                         'company': 'choco',
+                         'email': 'ba@na.na',
+                         'description': 'yoyo',
+                         'groups': ['system:partner-engineers', '6278198148']}
+        response_group = client.post(url, format='json', data=payload_group)
+        log.debug('%s', response_group.content)
+        log.debug('%s', response_group.status_code)
+
+        # namespace with incorrect owner id to assign
+        payload_wrong = {'name': 'banananana',
+                         'company': 'chococo',
+                         'email': 'ba@nani.ta',
+                         'description': 'xoxo',
+                         'groups': ['system:partner-engineers', '6278l98148']}
+        response_wrong = client.post(url, format='json', data=payload_wrong)
+        log.debug('%s', response_wrong.content)
+        log.debug('%s', response_wrong.status_code)
+
+        # namespace with incorrect owner id to assign
+        payload_wrong_prefix = {'name': 'banananana',
+                                'company': 'chococo',
+                                'email': 'ba@nani.ta',
+                                'description': 'xoxo',
+                                'groups': ['system:partner-engineers',
+                                           'rh-identity-account:6278198148']}
+        response_wrong_prefix = client.post(url, format='json',
+                                            data=payload_wrong_prefix)
+        log.debug('%s', response_wrong_prefix.content)
+        log.debug('%s', response_wrong_prefix.status_code)
+
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response_group.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response_wrong.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response_wrong_prefix.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_put_namespace(self):
         username = 'saruman'

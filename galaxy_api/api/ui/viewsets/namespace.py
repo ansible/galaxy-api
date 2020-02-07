@@ -64,6 +64,8 @@ class NamespaceViewSet(
             if account == RH_PE_ACCOUNT_SCOPE:
                 groups.append(account)
             else:
+                if not account.isdigit():
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
                 group, _ = auth_models.Group.objects.get_or_create_identity(
                         auth.RH_ACCOUNT_SCOPE, account)
                 groups.append(group.name)
