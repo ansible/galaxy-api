@@ -144,12 +144,21 @@ PULP_CONTENT_PATH_PREFIX = '/api/automation-hub/v3/artifacts/collections/'
 # Application settings
 # ---------------------------------------------------------
 
+# Generate a request_id. Use for local dev. In prod/ci, the
+# the 3scale layer adds the X-request-id header
+REQUEST_ID_HEADER = None
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'default': {
-            'format': '%(asctime)s %(levelname)s %(name)s: %(message)s',
+            'format': '%(asctime)s %(levelname)s %(name)s %(request_id)s: %(message)s',
+        },
+    },
+    "filters": {
+       "request_id": {
+            "()": "request_id.logging.RequestIdFilter"
         },
     },
     'handlers': {
@@ -157,11 +166,19 @@ LOGGING = {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'default',
-        }
+            'filters': ["request_id"],
+        },
+    },
+    'root': {
+        'level': 'ERROR',
+        'handlers': ['console'],
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'galaxy_api': {
+            'level': 'INFO',
         },
     }
 }
