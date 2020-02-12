@@ -1,3 +1,4 @@
+---
 language: python
 python: '3.6'
 services:
@@ -16,8 +17,9 @@ install:
 
 jobs:
   include:
-    - name: "Flake8"
-      script: tox -e flake8
+    - name: "Linters"
+      script: tox -e linters
+
     - name: "Unit tests"
       script: tox -e py36
       services:

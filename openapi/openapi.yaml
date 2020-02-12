@@ -1,3 +1,4 @@
+---
 openapi: "3.0.0"
 
 info:
@@ -76,12 +77,11 @@ info:
     ```
 
 
-
 paths:
 
-# -------------------------------------
-# Collections
-# -------------------------------------
+  # -------------------------------------
+  # Collections
+  # -------------------------------------
 
   '/collections/':
     get:
@@ -115,7 +115,7 @@ paths:
         '200':
           $ref: '#/components/responses/Collection'
         'default':
-            $ref: '#/components/responses/Errors'
+          $ref: '#/components/responses/Errors'
 
   '/collections/{namespace}/{name}/versions/':
     parameters:
@@ -156,9 +156,9 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-# -------------------------------------
-# Artifacts
-# -------------------------------------
+  # -------------------------------------
+  # Artifacts
+  # -------------------------------------
 
   '/artifacts/collections/':
     post:
@@ -216,9 +216,9 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-# -------------------------------------
-# Imports
-# -------------------------------------
+  # -------------------------------------
+  # Imports
+  # -------------------------------------
 
   '/imports/collections/{import_id}/':
     get:
@@ -403,9 +403,9 @@ components:
           required:
             - data
 
-# -------------------------------------
-# Schemas: Collection
-# -------------------------------------
+    # -------------------------------------
+    # Schemas: Collection
+    # -------------------------------------
 
     CollectionVersion:
       type: object
@@ -608,9 +608,9 @@ components:
           required:
             - data
 
-# -------------------------------------
-# Schemas: Errors
-# -------------------------------------
+    # -------------------------------------
+    # Schemas: Errors
+    # -------------------------------------
 
     Errors:
       title: 'Errors'
@@ -672,9 +672,9 @@ components:
         - detail
         - status
 
-# -------------------------------------
-# Schemas: Namespaces
-# -------------------------------------
+    # -------------------------------------
+    # Schemas: Namespaces
+    # -------------------------------------
 
     Namespace:
       title: 'Namespace'
@@ -767,9 +767,9 @@ components:
           type: string
           format: uri
 
-# -------------------------------------
-# Schemas: Pagination
-# -------------------------------------
+    # -------------------------------------
+    # Schemas: Pagination
+    # -------------------------------------
 
     PageInfo:
       description: 'Pagination info'
@@ -1077,4 +1077,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Errors'
-

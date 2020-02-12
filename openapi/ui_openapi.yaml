@@ -1,3 +1,4 @@
+---
 openapi: "3.0.0"
 
 info:
@@ -82,9 +83,9 @@ info:
 
 paths:
 
-# -------------------------------------
-# UI: Collections
-# -------------------------------------
+  # -------------------------------------
+  # UI: Collections
+  # -------------------------------------
 
   '/_ui/collections/':
     get:
@@ -129,7 +130,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CollectionUi'
         'default':
-            $ref: '#/components/responses/Errors'
+          $ref: '#/components/responses/Errors'
 
   '/_ui/collections/{namespace}/{name}/versions/':
     parameters:
@@ -170,9 +171,9 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-# -------------------------------------
-# UI: Imports
-# -------------------------------------
+  # -------------------------------------
+  # UI: Imports
+  # -------------------------------------
 
   '/_ui/imports/collections/':
     get:
@@ -193,9 +194,9 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-# -------------------------------------
-# UI: Namespaces
-# -------------------------------------
+  # -------------------------------------
+  # UI: Namespaces
+  # -------------------------------------
 
   '/_ui/namespaces/':
     get:
@@ -244,9 +245,9 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-# -------------------------------------
-# UI: Tags
-# -------------------------------------
+  # -------------------------------------
+  # UI: Tags
+  # -------------------------------------
 
   '/_ui/tags/':
     get:
@@ -260,9 +261,9 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-# -------------------------------------
-# UI: Users
-# -------------------------------------
+  # -------------------------------------
+  # UI: Users
+  # -------------------------------------
 
   '/_ui/users/':
     get:
@@ -296,9 +297,9 @@ paths:
         'default':
           $ref: '#/components/responses/Errors'
 
-# -------------------------------------
-# UI: Profile
-# -------------------------------------
+  # -------------------------------------
+  # UI: Profile
+  # -------------------------------------
 
   '/_ui/profile/':
     get:
@@ -397,7 +398,7 @@ components:
           nullable: true
           type: string
       required:
-      - name
+        - name
 
     CollectionUiVersionSummary:
       type: object
@@ -600,9 +601,9 @@ components:
             - data
 
 
-# -------------------------------------
-# Schemas: Errors
-# -------------------------------------
+    # -------------------------------------
+    # Schemas: Errors
+    # -------------------------------------
 
     Errors:
       title: 'Errors'
@@ -664,9 +665,9 @@ components:
         - detail
         - status
 
-# -------------------------------------
-# Schemas: Namespaces
-# -------------------------------------
+    # -------------------------------------
+    # Schemas: Namespaces
+    # -------------------------------------
 
     Namespace:
       title: 'Namespace'
@@ -759,9 +760,9 @@ components:
           type: string
           format: uri
 
-# -------------------------------------
-# Schemas: Pagination
-# -------------------------------------
+    # -------------------------------------
+    # Schemas: Pagination
+    # -------------------------------------
 
     PageInfo:
       description: 'Pagination info'
