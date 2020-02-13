@@ -1,9 +1,13 @@
+import re
+
 from django.db import transaction
 
+from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer, SlugRelatedField
 
 from galaxy_api.api import models
 from galaxy_api.auth import models as auth_models
+from galaxy_api.auth import auth
 
 
 class NamespaceLinkSerializer(ModelSerializer):
@@ -15,9 +19,9 @@ class NamespaceLinkSerializer(ModelSerializer):
 class NamespaceSerializer(ModelSerializer):
     links = NamespaceLinkSerializer(many=True, required=False)
     groups = SlugRelatedField(
-            many=True,
-            slug_field='name',
-            queryset=auth_models.Group.objects.all()
+        many=True,
+        slug_field='name',
+        queryset=auth_models.Group.objects.all()
     )
 
     class Meta:
@@ -33,6 +37,40 @@ class NamespaceSerializer(ModelSerializer):
             'groups',
             'resources'
         )
+
+    def validate_name(self, name):
+        if not name:
+            raise ValidationError(detail={
+                'name': "Attribute 'name' is required"})
+        if not re.match(r'^[a-zA-Z0-9_]+$', name):
+            raise ValidationError(detail={
+                'name': 'Name can only contain [A-Za-z0-9_]'})
+        if(len(name) <= 2):
+            raise ValidationError(detail={
+                'name': 'Name must be longer than 2 characters'})
+        if(name.startswith('_')):
+            raise ValidationError(detail={
+                'name': "Name cannot begin with '_'"})
+        return name
+
+    def to_internal_value(self, data):
+        groups = data.get('groups')
+        if groups:
+            data['groups'] = self._sanitize_accounts(groups)
+        return super().to_internal_value(data)
+
+    def _sanitize_accounts(self, accounts):
+        sanitized_groups = [auth_models.RH_PARTNER_ENGINEER_GROUP]
+        for account in accounts:
+            if account == auth_models.RH_PARTNER_ENGINEER_GROUP:
+                continue
+            if not account.isdigit():
+                raise ValidationError(detail={
+                    'groups': 'Provided identifications are not numbers'})
+            group, _ = auth_models.Group.objects.get_or_create_identity(
+                auth.RH_ACCOUNT_SCOPE, account)
+            sanitized_groups.append(group.name)
+        return sanitized_groups
 
     @transaction.atomic
     def update(self, instance, validated_data):
@@ -81,4 +119,5 @@ class NamespaceSummarySerializer(NamespaceSerializer):
             'avatar_url',
             'description',
         )
+
         read_only_fields = ('name', )

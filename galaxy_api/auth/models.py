@@ -10,6 +10,7 @@ __all__ = (
 
 
 SYSTEM_SCOPE = 'system'
+RH_PARTNER_ENGINEER_GROUP = f'{SYSTEM_SCOPE}:partner-engineers'
 
 
 class User(ExportModelOperationsMixin('user'), auth_models.AbstractUser):
