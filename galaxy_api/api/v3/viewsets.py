@@ -31,6 +31,7 @@ from galaxy_api.api.models import Namespace
 from galaxy_api.api.v3.serializers import CollectionSerializer, CollectionUploadSerializer
 from galaxy_api.common import pulp
 from galaxy_api.common import metrics
+from galaxy_api.common.parsers import AnsibleGalaxy29MultiPartParser
 from galaxy_api.api import permissions, models
 from galaxy_api import constants
 
@@ -151,12 +152,16 @@ class CollectionArtifactUploadView(views.APIView):
         permissions.IsNamespaceOwner,
     ]
 
+    parser_classes = [AnsibleGalaxy29MultiPartParser]
+
     def post(self, request, *args, **kwargs):
         metrics.collection_import_attempts.inc()
+
         serializer = CollectionUploadSerializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
 
         data = serializer.validated_data
+
         filename = data['filename']
 
         try:
